@@ -12,7 +12,7 @@
  *
  * This class is to enforce compile-time checking, and where possible,
  * compile-time calculation of SI values using constexpr.
- * 
+ *
  * Note: MESI_LITERAL_TYPE may be defined to set the storage type
  * used by the operator literal overloads
  *
@@ -213,8 +213,8 @@ constexpr bool operator>(
 
 template<typename T, int t_m, int t_s, int t_kg>
 constexpr bool operator>=(
-	MesiType<T, t_m, t_s, t_kg> const& right,
-	MesiType<T, t_m, t_s, t_kg> const& left
+	MesiType<T, t_m, t_s, t_kg> const& left,
+	MesiType<T, t_m, t_s, t_kg> const& right
 ) {
 	return left > right || left == right;
 }
