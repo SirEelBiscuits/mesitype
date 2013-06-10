@@ -5,12 +5,6 @@
 #include <ctime>
 
 BEGIN_TEST_DEF(CompileTest) {
-#include "mesitype.h"
-
-#include <cstdlib>
-#include <ctime>
-
-BEGIN_TEST_DEF(CompileTest) {
 	auto Var = 3_m;
 	auto Var2 = 3_s;
 	auto Var3 = 3_kg;
