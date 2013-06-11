@@ -44,9 +44,8 @@ BEGIN_TEST_DEF(AbelianTest) {
 		auto weight = MesiType<int, 0, 0, 1>(rand() % 100);
 		auto time   = MesiType<int, 0, 1, 0>(rand() % 100);
 
-		if( ASSERT_EQ_OUT( weight * time, time * weight,
-				[](decltype(weight*time) x){ std::cerr << x.val; } ) )
-			return false;
+		ASSERT_EQ_OUT( weight * time, time * weight,
+				[](decltype(weight*time) x){ std::cerr << x.val; } );
 	}
 	return true;
 }
@@ -60,30 +59,18 @@ BEGIN_TEST_DEF(RelationTest) {
 		t1.val = rand() % 100 + (rand() % 100 / 100.f);
 		t2.val = rand() % 100 + (rand() % 100 / 100.f);
 
-		if( !(t1 < t2)
-			&& ASSERT_GEQ_OUT( t1, t2, [](decltype(t1) x){ std::cerr << x.val; } )
-		)
-			return false;
-		if( !(t1 > t2)
-			&& ASSERT_LEQ_OUT( t1, t2, [](decltype(t1) x){ std::cerr << x.val; } )
-		)
-			return false;
-		if( !(t1 <= t2)
-			&& ASSERT_GT_OUT( t1, t2, [](decltype(t1) x){ std::cerr << x.val; } )
-		)
-			return false;
-		if( !(t1 >= t2)
-			&& ASSERT_LT_OUT( t1, t2, [](decltype(t1) x){ std::cerr << x.val; } )
-		)
-			return false;
-		if( !(t1 == t2)
-			&& ASSERT_NEQ_OUT( t1, t2, [](decltype(t1) x){ std::cerr << x.val; } )
-		)
-			return false;
-		if( !(t1 != t2)
-			&& ASSERT_EQ_OUT( t1, t2, [](decltype(t1) x){ std::cerr << x.val; } )
-		)
-			return false;
+		if( !(t1 < t2) )
+			ASSERT_GEQ_OUT( t1, t2, [](decltype(t1) x){ std::cerr << x.val; } );
+		if( !(t1 > t2) )
+			ASSERT_LEQ_OUT( t1, t2, [](decltype(t1) x){ std::cerr << x.val; } );
+		if( !(t1 <= t2) )
+			ASSERT_GT_OUT( t1, t2, [](decltype(t1) x){ std::cerr << x.val; } );
+		if( !(t1 >= t2) )
+			ASSERT_LT_OUT( t1, t2, [](decltype(t1) x){ std::cerr << x.val; } );
+		if( !(t1 == t2) )
+			ASSERT_NEQ_OUT( t1, t2, [](decltype(t1) x){ std::cerr << x.val; } );
+		if( !(t1 != t2) )
+			ASSERT_EQ_OUT( t1, t2, [](decltype(t1) x){ std::cerr << x.val; } );
 	}
 	return true;
 }
