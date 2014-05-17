@@ -58,7 +58,8 @@ struct MesiType {
 		else if( t_kg != 0 )
 			s_unitString += "kg^"
 				+ std::to_string(static_cast<long long>(t_kg)) + " ";
-		return s_unitString.substr(0, s_unitString.size() - 1);
+		s_unitString = s_unitString.substr(0, s_unitString.size() - 1);
+		return s_unitString;
 	}
 
 	MesiType<T, t_m, t_s, t_kg>& operator+=(MesiType<T, t_m, t_s, t_kg> const& rhs) {
