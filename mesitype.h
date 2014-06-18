@@ -229,26 +229,32 @@ constexpr bool operator>=(
 #	define MESI_LITERAL_TYPE float
 #endif
 
-constexpr MesiType<MESI_LITERAL_TYPE, 1, 0, 0> operator "" _m(long double arg) {
-	return MesiType<MESI_LITERAL_TYPE, 1, 0, 0>(arg);
+namespace Mesi {
+	typedef MesiType<MESI_LITERAL_TYPE, 1, 0, 0> Meters;
+	typedef MesiType<MESI_LITERAL_TYPE, 0, 1, 0> Seconds;
+	typedef MesiType<MESI_LITERAL_TYPE, 0, 0, 1> Kilos;
 }
 
-constexpr MesiType<MESI_LITERAL_TYPE, 0, 1, 0> operator "" _s(long double arg) {
-	return MesiType<MESI_LITERAL_TYPE, 0, 1, 0>(arg);
+constexpr Mesi::Meters operator "" _m(long double arg) {
+	return Mesi::Meters(arg);
 }
 
-constexpr MesiType<MESI_LITERAL_TYPE, 0, 0, 1> operator "" _kg(long double arg) {
-	return MesiType<MESI_LITERAL_TYPE, 0, 0, 1>(arg);
+constexpr Mesi::Seconds operator "" _s(long double arg) {
+	return Mesi::Seconds(arg);
 }
 
-constexpr MesiType<MESI_LITERAL_TYPE, 1, 0, 0> operator "" _m(unsigned long long arg) {
-	return MesiType<MESI_LITERAL_TYPE, 1, 0, 0>(arg);
+constexpr Mesi::Kilos operator "" _kg(long double arg) {
+	return Mesi::Kilos(arg);
 }
 
-constexpr MesiType<MESI_LITERAL_TYPE, 0, 1, 0> operator "" _s(unsigned long long arg) {
-	return MesiType<MESI_LITERAL_TYPE, 0, 1, 0>(arg);
+constexpr Mesi::Meters operator "" _m(unsigned long long arg) {
+	return Mesi::Meters(arg);
 }
 
-constexpr MesiType<MESI_LITERAL_TYPE, 0, 0, 1> operator "" _kg(unsigned long long arg) {
-	return MesiType<MESI_LITERAL_TYPE, 0, 0, 1>(arg);
+constexpr Mesi::Seconds operator "" _s(unsigned long long arg) {
+	return Mesi::Seconds(arg);
+}
+
+constexpr Mesi::Kilos operator "" _kg(unsigned long long arg) {
+	return Mesi::Kilos(arg);
 }
