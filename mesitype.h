@@ -1,3 +1,5 @@
+#pragma once
+
 #include <string>
 
 // TODO add copyright notice?
