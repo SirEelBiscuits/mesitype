@@ -9,7 +9,7 @@
 #ifdef MESI_COMPATIBILITY
 #	define CONSTEXPR
 #else
-# define CONSTEXPR constexpr
+#	define CONSTEXPR constexpr
 #endif
 
 /**
