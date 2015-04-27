@@ -1,3 +1,5 @@
+#pragma once
+
 #include <string>
 
 // TODO add copyright notice?
@@ -250,6 +252,7 @@ CONSTEXPR bool operator>=(
 #endif
 
 namespace Mesi {
+<<<<<<< HEAD
 	using Scalar    = MesiType<MESI_LITERAL_TYPE, 0, 0, 0>;
 	using Meters    = MesiType<MESI_LITERAL_TYPE, 1, 0, 0>;
 	using MetersSq  = MesiType<MESI_LITERAL_TYPE, 2, 0, 0>;
