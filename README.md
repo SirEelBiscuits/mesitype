@@ -29,7 +29,7 @@ and to create a meters squared per kilo type, you might use:
 
     MesiType<float, 2, 0, -1>
 
-For simple units, where supported, literal overloads exist. These use float for the T arguement by default, but this is 
+For simple units, where supported, literal overloads exist. These use float for the T argument by default, but this is 
 configurable - see the source for details. These can be invoked as any of:
 
 * _m
@@ -64,7 +64,7 @@ These types also have shorthand names for ease of variable creation, in the Mesi
 * Newtons
 * Scalar
 
-except for Scaler, these may also take a Sq suffix for the squared variant. Where possible, I strongly recommend using the
+except for Scalar, these may also take a Sq suffix for the squared variant. Where possible, I strongly recommend using the
 precise unit names only when they need to be enforced. For intermediate storage, auto is shorter, safer, and far more sensible.
 That said, how you use it is your business.
 
@@ -73,13 +73,13 @@ Limitations
 Currently only relatively standard types for the T argument. There are improvements that could be made for this thanks to the
 addition of decltype to the spec, but it increases code complexity massively, and so far I've no indication that it's needed.
 
-SI prefices are not supported - you cannot mark a type as kiloseconds or picograms. This would require a system like std::chrono's
+SI prefixes are not supported - you cannot mark a type as kiloseconds or picograms. This would require a system like std::chrono's
 ratios, which would be both complex, and remove some of the optimisation oportunities for the compiler (potentially). I am not
 planning to change this.
 
 Planned Features
 ----------------
 
-Conversion between Mesi::Seconds, and std::chrono.
-Adding other common and useful units to the suffices and shorthand variable names.
-Confirmation of the efficiency of the dissassembly.
+* Conversion between Mesi::Seconds, and std::chrono.
+* Adding other common and useful units to the suffices and shorthand variable names.
+* Confirmation of the efficiency of the dissassembly.
