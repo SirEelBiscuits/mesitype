@@ -1,5 +1,8 @@
 MesiType
 ========
+
+[![Build Status](https://api.travis-ci.org/SirEelBiscuits/mesitype.svg?branch=master)](https://travis-ci.org/SirEelBiscuits/mesitype)
+
 MEticulous Systeme International TYPEs. For automatic, compile-time checked handling of units with orthogonal meanings. Ideally, the system will add zero overhead given a sufficiently smart compiler, but this has not been checked yet.
 
 Features
