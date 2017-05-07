@@ -180,33 +180,33 @@ namespace Mesi {
 	 * Scalers by non-SI values (allows things like 2 * 3._m
 	 */
 
-	template<typename T, int t_m, int t_s, int t_kg>
+	template<typename T, int t_m, int t_s, int t_kg, typename S>
 	constexpr Type<T, t_m, t_s, t_kg> operator*(
 		Type<T, t_m, t_s, t_kg> const& left,
-		T const& right
+		S const& right
 	) {
 		return Type<T, t_m, t_s, t_kg>(left.val * right);
 	}
 
-	template<typename T, int t_m, int t_s, int t_kg>
+	template<typename T, int t_m, int t_s, int t_kg, typename S>
 	constexpr Type<T, t_m, t_s, t_kg> operator*(
-		T const & left,
+		S const & left,
 		Type<T, t_m, t_s, t_kg> const& right
 	) {
 		return right * left;
 	}
 
-	template<typename T, int t_m, int t_s, int t_kg>
+	template<typename T, int t_m, int t_s, int t_kg, typename S>
 	constexpr Type<T, t_m, t_s, t_kg> operator/(
 		Type<T, t_m, t_s, t_kg> const& left,
-		T const& right
+		S const& right
 	) {
 		return Type<T, t_m, t_s, t_kg>(left.val / right);
 	}
 
-	template<typename T, int t_m, int t_s, int t_kg>
+	template<typename T, int t_m, int t_s, int t_kg, typename S>
 	constexpr Type<T, -t_m, -t_s, -t_kg> operator/(
-		T const & left,
+		S const & left,
 		Type<T, t_m, t_s, t_kg> const& right
 	) {
 		return Type<T, -t_m, -t_s, -t_kg>( left * right.val );
@@ -269,6 +269,9 @@ namespace Mesi {
 	 * before calling!
 	 */
 
+#pragma push_macro("_N")
+#undef _N
+
 	constexpr Meters operator "" _m(long double arg) {
 		return Meters(arg);
 	}
@@ -301,36 +304,39 @@ namespace Mesi {
 		return Newtons(arg);
 	}
 
-	constexpr Meters operator "" _m2(long double arg) {
+	constexpr MetersSq operator "" _m2(long double arg) {
 		return MetersSq(arg);
 	}
 
-	constexpr Seconds operator "" _s2(long double arg) {
+	constexpr SecondsSq operator "" _s2(long double arg) {
 		return SecondsSq(arg);
 	}
 
-	constexpr Kilos operator "" _kg2(long double arg) {
+	constexpr KilosSq operator "" _kg2(long double arg) {
 		return KilosSq(arg);
 	}
 
-	constexpr Newtons operator "" _N2(long double arg) {
+	constexpr NewtonsSq operator "" _N2(long double arg) {
 		return NewtonsSq(arg);
 	}
 
-	constexpr Meters operator "" _m2(unsigned long long arg) {
+	constexpr MetersSq operator "" _m2(unsigned long long arg) {
 		return MetersSq(arg);
 	}
 
-	constexpr Seconds operator "" _s2(unsigned long long arg) {
+	constexpr SecondsSq operator "" _s2(unsigned long long arg) {
 		return SecondsSq(arg);
 	}
 
-	constexpr Kilos operator "" _kg2(unsigned long long arg) {
+	constexpr KilosSq operator "" _kg2(unsigned long long arg) {
 		return KilosSq(arg);
 	}
 
-	constexpr Newtons operator "" _N2(unsigned long long arg) {
+	constexpr NewtonsSq operator "" _N2(unsigned long long arg) {
 		return NewtonsSq(arg);
 	}
+
+#pragma pop_macro("_N")
+
 }
 
