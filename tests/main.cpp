@@ -202,15 +202,92 @@ Tee_Test(test_multiplicative_behaviour) {
 }
 
 Tee_Test(test_assignment_operators) {
+	auto m = Mesi::Meters(1);
 
+	Tee_SubTest(test_assignment) {
+		m = Mesi::Meters(2);
+		assert(m.val == 2);
+	}
+
+	Tee_SubTest(test_add_assignment) {
+		m += Mesi::Meters(1);
+		assert(m.val == 3);
+	}
+
+	Tee_SubTest(test_sub_assignment) {
+		m -= Mesi::Meters(2);
+		assert(m.val == 1);
+	}
+
+	Tee_SubTest(test_multiply_assignment) {
+		m *= 4;
+		assert(m.val == 4);
+	}
+
+	Tee_SubTest(test_divide_assignment) {
+		m /= 2;
+		assert(m.val == 2);
+	}
+
+	Tee_SubTest(test_multiply_scalar_assignment) {
+		m *= Mesi::Scalar(3);
+		assert(m.val == 6);
+	}
+
+	Tee_SubTest(test_divide_scalar_assignment) {
+		m /= Mesi::Scalar(2);
+		assert(m.val == 3);
+	}
 }
 
 Tee_Test(test_comparison_operators) {
+	auto m = Mesi::Meters(2);
 
+	Tee_SubTest(test_comparison_equals) {
+		assert(m == Mesi::Meters(2));
+		assert(m == m);
+		assert((m == m + m) == false);
+	}
+
+	Tee_SubTest(test_comaprison_not_equals) {
+		assert(m != Mesi::Meters(3));
+		assert((m != m) == false);
+	}
+
+	Tee_SubTest(test_less_than) {
+		assert(m < m + m);
+		assert((m < m) == false);
+		assert((m + m < m) == false);
+	}
+
+	Tee_SubTest(test_less_equal_than) {
+		assert(m <= m + m);
+		assert(m <= m);
+		assert((m + m <= m) == false);
+	}
+
+	Tee_SubTest(test_greater_than) {
+		assert((m > m + m) == false);
+		assert((m > m) == false);
+		assert(m + m > m);
+	}
+
+	Tee_SubTest(test_greater_equal_than) {
+		assert((m >= m + m) == false);
+		assert(m >= m);
+		assert(m + m >= m);
+	}
 }
 
 Tee_Test(test_literal_overloads) {
-
+	assert(Mesi::Meters(1) == 1_m);
+	assert(Mesi::MetersSq(1) == 1_m2);
+	assert(Mesi::Seconds(1) == 1_s);
+	assert(Mesi::SecondsSq(1) == 1_s2);
+	assert(Mesi::Kilos(1) == 1_kg);
+	assert(Mesi::KilosSq(1) == 1_kg2);
+	assert(Mesi::Newtons(1) == 1_N);
+	assert(Mesi::NewtonsSq(1) == 1_N2);
 }
 
 int main() {

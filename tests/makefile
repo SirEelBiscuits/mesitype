@@ -14,7 +14,7 @@ test:
 	@./$(TARGET)
 	@echo "Done"
 
-$(TARGET): $(SRC_FILES)
+$(TARGET): $(SRC_FILES) ../mesitype.h
 	@echo "Building $(TARGET)"
 	@$(CXX) $(C_FLAGS) $(SRC_FILES) -o $(TARGET)
 	@echo "Done"
