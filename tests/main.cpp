@@ -171,12 +171,55 @@ Tee_Test(type_info_tests) {
 	}
 }
 
+Tee_Test(test_multiplicative_behaviour) {
+		auto m = Mesi::Meters(2);
+		auto s = Mesi::Seconds(3);
+		auto kg = Mesi::Seconds(5);
+		auto mskg = m * s * kg;
+
+	Tee_SubTest(test_multiplying_values_consistent_with_floats) {
+		assert(static_cast<float>(mskg) == 30);
+	}
+
+	Tee_SubTest(test_multiplying_units_is_commutative) {
+		assert(m * s == s * m);
+		assert(s * kg == kg * s);
+		assert(kg * m == m * kg);
+	}
+
+	Tee_SubTest(test_multiplying_units_is_associative) {
+		assert((m * s) * kg == m * (s * kg));
+	}
+
+	Tee_SubTest(test_inversion_multiplies_to_unity) {
+		assert((1 / mskg) * mskg == Mesi::Scalar(1));
+		assert(mskg / mskg == Mesi::Scalar(1));
+	}
+
+	Tee_SubTest(test_inversion_methods_match) {
+		assert(1 / mskg == mskg / mskg / mskg);
+	}
+}
+
+Tee_Test(test_assignment_operators) {
+
+}
+
+Tee_Test(test_comparison_operators) {
+
+}
+
+Tee_Test(test_literal_overloads) {
+
+}
+
 int main() {
 	int successes;
 	vector<string> fails;
 	tie(successes, fails) = Tee::RunAllTests();
 	for(auto f : fails)
 		cout << f;
-	cout << successes << " successes, " << fails.size() << " failures." << endl;
+	cout << successes << " successes, "
+		<< fails.size() << " failures." << endl;
 	return fails.size() == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }

@@ -209,7 +209,7 @@ namespace Mesi {
 		S const & left,
 		Type<T, t_m, t_s, t_kg> const& right
 	) {
-		return Type<T, -t_m, -t_s, -t_kg>( left * right.val );
+		return Type<T, -t_m, -t_s, -t_kg>( left / right.val );
 	}
 
 	/*
