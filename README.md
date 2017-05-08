@@ -15,15 +15,15 @@ Usage
 -----
 To create a custom type, the syntax is:
 
-    MesiType<T, t_m, t_s, t_kg>
+    Mesi::Type<T, t_m, t_s, t_kg>
     
 where T is the 'storage type', and t_m, t_s, and t_kg are the (integral) exponents of metres, seconds, and kilos respectively. E.g., to create a meters type you might use:
 
-    MesiType<float, 1, 0, 0>
+    Mesi::Type<float, 1, 0, 0>
     
 and to create a meters squared per kilo type, you might use:
 
-    MesiType<float, 2, 0, -1>
+    Mesi::Type<float, 2, 0, -1>
 
 For simple units, where supported, literal operator overloads exist. These use float for the T argument by default, but this is configurable - see the source for details. These can be invoked as any of:
 
