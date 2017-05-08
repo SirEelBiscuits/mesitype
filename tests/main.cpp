@@ -5,6 +5,7 @@
 #include <string>
 #include <tuple>
 #include <iostream>
+#include <regex>
 
 using namespace std;
 
@@ -98,14 +99,75 @@ Tee_Test(test_divisor_rules) {
 
 	Tee_SubTest(test_dividing_by_one_is_identity) {
 		assert(x / 1 == x);
-		assert(y / 1 == y);
-		assert(z / 1 == z);
+		assert(y / 1.0 == y);
+		assert(z / 1.0f == z);
 	}
 
 	Tee_SubTest(test_dividion_inverts_scaling) {
 		assert( (x / 2) * 2 == x);
 		assert( (y / 7) * 7 == y);
 		assert( (z / 5) * 5 == z);
+	}
+}
+
+Tee_Test(type_info_tests) {
+	Tee_SubTest(test_meters_indicators_match_units) {
+		auto s = Mesi::Scalar(1);
+		auto m = Mesi::Meters(1);
+		auto m2 = Mesi::MetersSq(1);
+
+		auto mUnit = std::regex(R"(m |m$)");
+		auto m2Unit = std::regex(R"(m\^)");
+
+		assert(s.getUnit().compare("") == 0);
+		assert(std::regex_search(m.getUnit(), mUnit));
+		assert(std::regex_search(m2.getUnit(), m2Unit));
+	}
+
+	Tee_SubTest(test_seconds_indicators_match_units) {
+		auto S = Mesi::Scalar(1);
+		auto s = Mesi::Seconds(1);
+		auto s2 = Mesi::SecondsSq(1);
+
+		auto sUnit = std::regex(R"(s |s$)");
+		auto s2Unit = std::regex(R"(s\^)");
+
+		assert(S.getUnit().compare("") == 0);
+		assert(std::regex_search(s.getUnit(), sUnit));
+		assert(std::regex_search(s2.getUnit(), s2Unit));
+	}
+
+	Tee_SubTest(test_kilos_indicators_match_units) {
+		auto s = Mesi::Scalar(1);
+		auto kg = Mesi::Kilos(1);
+		auto kg2 = Mesi::KilosSq(1);
+
+		auto kgUnit = std::regex(R"(kg |kg$)");
+		auto kg2Unit = std::regex(R"(kg\^)");
+
+		assert(s.getUnit().compare("") == 0);
+		assert(std::regex_search(kg.getUnit(), kgUnit));
+		assert(std::regex_search(kg2.getUnit(), kg2Unit));
+	}
+
+	Tee_SubTest(test_all_unit_indicators_match_units) {
+		auto mskg = Mesi::Type<float, 1, 1, 1>(1).getUnit();
+		auto m2s2kg2 = Mesi::Type<float, 2, 2, 2>(1).getUnit();
+
+		auto mUnit = std::regex(R"(m |m$)");
+		auto m2Unit = std::regex(R"(m\^)");
+		auto sUnit = std::regex(R"(s |s$)");
+		auto s2Unit = std::regex(R"(s\^)");
+		auto kgUnit = std::regex(R"(kg |kg$)");
+		auto kg2Unit = std::regex(R"(kg\^)");
+
+		assert(std::regex_search(mskg, mUnit));
+		assert(std::regex_search(mskg, sUnit));
+		assert(std::regex_search(mskg, kgUnit));
+
+		assert(std::regex_search(m2s2kg2, m2Unit));
+		assert(std::regex_search(m2s2kg2, s2Unit));
+		assert(std::regex_search(m2s2kg2, kg2Unit));
 	}
 }
 
