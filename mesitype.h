@@ -263,79 +263,78 @@ namespace Mesi {
 		return left > right || left == right;
 	}
 
+	namespace Literals {
 	/*
 	 * Literal operators, to allow quick creation of basic types
 	 * Note that this defaults to the type set below, if no other is set
 	 * before calling!
 	 */
-}
-
 #pragma push_macro("_N")
 #undef _N
 
-constexpr Mesi::Meters operator "" _m(long double arg) {
-	return Mesi::Meters(arg);
-}
+		constexpr Mesi::Meters operator "" _m(long double arg) {
+			return Mesi::Meters(arg);
+		}
 
-constexpr Mesi::Seconds operator "" _s(long double arg) {
-	return Mesi::Seconds(arg);
-}
+		constexpr Mesi::Seconds operator "" _s(long double arg) {
+			return Mesi::Seconds(arg);
+		}
 
-constexpr Mesi::Kilos operator "" _kg(long double arg) {
-	return Mesi::Kilos(arg);
-}
+		constexpr Mesi::Kilos operator "" _kg(long double arg) {
+			return Mesi::Kilos(arg);
+		}
 
-constexpr Mesi::Newtons operator "" _N(long double arg) {
-	return Mesi::Newtons(arg);
-}
+		constexpr Mesi::Newtons operator "" _N(long double arg) {
+			return Mesi::Newtons(arg);
+		}
 
-constexpr Mesi::Meters operator "" _m(unsigned long long arg) {
-	return Mesi::Meters(arg);
-}
+		constexpr Mesi::Meters operator "" _m(unsigned long long arg) {
+			return Mesi::Meters(arg);
+		}
 
-constexpr Mesi::Seconds operator "" _s(unsigned long long arg) {
-	return Mesi::Seconds(arg);
-}
+		constexpr Mesi::Seconds operator "" _s(unsigned long long arg) {
+			return Mesi::Seconds(arg);
+		}
 
-constexpr Mesi::Kilos operator "" _kg(unsigned long long arg) {
-	return Mesi::Kilos(arg);
-}
+		constexpr Mesi::Kilos operator "" _kg(unsigned long long arg) {
+			return Mesi::Kilos(arg);
+		}
 
-constexpr Mesi::Newtons operator "" _N(unsigned long long arg) {
-	return Mesi::Newtons(arg);
-}
+		constexpr Mesi::Newtons operator "" _N(unsigned long long arg) {
+			return Mesi::Newtons(arg);
+		}
 
-constexpr Mesi::MetersSq operator "" _m2(long double arg) {
-	return Mesi::MetersSq(arg);
-}
+		constexpr Mesi::MetersSq operator "" _m2(long double arg) {
+			return Mesi::MetersSq(arg);
+		}
 
-constexpr Mesi::SecondsSq operator "" _s2(long double arg) {
-	return Mesi::SecondsSq(arg);
-}
+		constexpr Mesi::SecondsSq operator "" _s2(long double arg) {
+			return Mesi::SecondsSq(arg);
+		}
 
-constexpr Mesi::KilosSq operator "" _kg2(long double arg) {
-	return Mesi::KilosSq(arg);
-}
+		constexpr Mesi::KilosSq operator "" _kg2(long double arg) {
+			return Mesi::KilosSq(arg);
+		}
 
-constexpr Mesi::NewtonsSq operator "" _N2(long double arg) {
-	return Mesi::NewtonsSq(arg);
-}
+		constexpr Mesi::NewtonsSq operator "" _N2(long double arg) {
+			return Mesi::NewtonsSq(arg);
+		}
 
-constexpr Mesi::MetersSq operator "" _m2(unsigned long long arg) {
-	return Mesi::MetersSq(arg);
-}
+		constexpr Mesi::MetersSq operator "" _m2(unsigned long long arg) {
+			return Mesi::MetersSq(arg);
+		}
 
-constexpr Mesi::SecondsSq operator "" _s2(unsigned long long arg) {
-	return Mesi::SecondsSq(arg);
-}
+		constexpr Mesi::SecondsSq operator "" _s2(unsigned long long arg) {
+			return Mesi::SecondsSq(arg);
+		}
 
-constexpr Mesi::KilosSq operator "" _kg2(unsigned long long arg) {
-	return Mesi::KilosSq(arg);
-}
+		constexpr Mesi::KilosSq operator "" _kg2(unsigned long long arg) {
+			return Mesi::KilosSq(arg);
+		}
 
-constexpr Mesi::NewtonsSq operator "" _N2(unsigned long long arg) {
-	return Mesi::NewtonsSq(arg);
-}
-
+		constexpr Mesi::NewtonsSq operator "" _N2(unsigned long long arg) {
+			return Mesi::NewtonsSq(arg);
+		}
+	}
 #pragma pop_macro("_N")
-
+}

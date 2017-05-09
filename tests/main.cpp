@@ -280,6 +280,8 @@ Tee_Test(test_comparison_operators) {
 }
 
 Tee_Test(test_literal_overloads) {
+	using namespace Mesi::Literals;
+
 	assert(Mesi::Meters(1) == 1_m);
 	assert(Mesi::MetersSq(1) == 1_m2);
 	assert(Mesi::Seconds(1) == 1_s);

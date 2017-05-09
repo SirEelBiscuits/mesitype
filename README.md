@@ -29,7 +29,7 @@ Usage
 To create a custom type, the syntax is:
 
 ```cpp
-    Mesi::Type<T, t_m, t_s, t_kg>
+Mesi::Type<T, t_m, t_s, t_kg>
 ```
     
 where T is the 'storage type', and `t_m`, `t_s`, and `t_kg` are the
@@ -56,8 +56,15 @@ These can be invoked as any of:
 * `_kg`
 * `_N`
 
-or any of the above with a 2 suffix for that unit squared. These overloads
-are `constexpr`, and so should incur no runtime cost.
+or any of the above with a 2 suffix for that unit squared.
+To use these, you need to do
+
+```cpp
+using namespace Mesi::Literals;
+```
+
+at your preferred scope.
+These overloads are `constexpr`, and so should incur no runtime cost.
 Additionally to create hybrid units, using the above with * and / should
 also have no cost as these are `constexpr` functions as well.
 Example:
