@@ -220,7 +220,8 @@ namespace Mesi {
 		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
 		S const& right
 	) {
-		return left / typename RationalTypeReduced<T, TYPE_A_PARAMS>::ScalarType(T(right));
+		using Scalar = typename RationalTypeReduced<T, TYPE_A_PARAMS>::ScalarType;
+		return left / Scalar(T(right));
 	}
 
 	template<typename T, TYPE_A_FULL_PARAMS, typename S>
@@ -228,7 +229,8 @@ namespace Mesi {
 		S const & left,
 		RationalTypeReduced<T, TYPE_A_PARAMS> const& right
 	) {
-		return typename RationalTypeReduced<T, TYPE_A_PARAMS>::ScalarType(T(left)) / right;
+		using Scalar = typename RationalTypeReduced<T, TYPE_A_PARAMS>::ScalarType;
+		return Scalar(T(left)) / right;
 	}
 
 	/*
