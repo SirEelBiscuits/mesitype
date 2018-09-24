@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <ratio>
 
 namespace Mesi {
 	/**
@@ -20,19 +21,37 @@ namespace Mesi {
 	 * @author Jameson Thatcher (a.k.a. SirEel)
 	 *
 	 */
-	template<typename T, int t_m, int t_s, int t_kg>
-	struct Type {
+	template<typename T,
+		intmax_t t_m_n, intmax_t t_m_d,
+		intmax_t t_s_n, intmax_t t_s_d,
+		intmax_t t_kg_n, intmax_t t_kg_d,
+		intmax_t t_A_n, intmax_t t_A_d,
+		intmax_t t_K_n, intmax_t t_K_d,
+		intmax_t t_mol_n, intmax_t t_mol_d,
+		intmax_t t_cd_n, intmax_t t_cd_d>
+	struct RationalTypeReduced
+	{
 		using BaseType = T;
+		using ScalarType = RationalTypeReduced<T, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1>;
+
+		static_assert(std::ratio<t_m_n, t_m_d>::num == t_m_n);
+		static_assert(std::ratio<t_s_n, t_s_d>::num == t_s_n);
+		static_assert(std::ratio<t_kg_n, t_kg_d>::num == t_kg_n);
+		static_assert(std::ratio<t_A_n, t_A_d>::num == t_A_n);
+		static_assert(std::ratio<t_K_n, t_K_d>::num == t_K_n);
+		static_assert(std::ratio<t_mol_n, t_mol_d>::num == t_mol_n);
+		static_assert(std::ratio<t_cd_n, t_cd_d>::num == t_cd_n);
+
 		T val;
 
-		constexpr Type()
+		constexpr RationalTypeReduced()
 		{}
 
-		constexpr explicit Type(T const in)
+		constexpr explicit RationalTypeReduced(T const in)
 			:val(in)
 		{}
 
-		constexpr Type(Type const& in)
+		constexpr RationalTypeReduced(RationalTypeReduced const& in)
 			:val(in.val)
 		{}
 
@@ -47,58 +66,232 @@ namespace Mesi {
 			static std::string s_unitString("");
 			if( s_unitString.size() > 0 )
 				return s_unitString;
+#define DIM_TO_STRING(TP, NAME) if( t_##TP##_n == 1 && t_##TP##_d == 1 ) s_unitString += std::string(#NAME) + " "; else if( t_##TP##_n != 0 && t_##TP##_d == 1) s_unitString += std::string(#NAME) + "^" + std::to_string(static_cast<long long>(t_##TP##_n)) + " "; else s_unitString += std::string(#NAME) + "^(" + std::to_string(static_cast<long long>(t_##TP##_n)) + "/" + std::to_string(static_cast<long long>(t_##TP##_d)) + ") ";
 
-			if( t_m == 1 )
-				s_unitString += "m ";
-			else if( t_m != 0 )
-				s_unitString += "m^"
-					+ std::to_string(static_cast<long long>(t_m)) + " ";
-			if( t_s == 1 )
-				s_unitString += "s ";
-			else if( t_s != 0 )
-				s_unitString += "s^"
-					+ std::to_string(static_cast<long long>(t_s)) + " ";
-			if( t_kg == 1 )
-				s_unitString += "kg ";
-			else if( t_kg != 0 )
-				s_unitString += "kg^"
-					+ std::to_string(static_cast<long long>(t_kg)) + " ";
+			DIM_TO_STRING(m, "m");
+			DIM_TO_STRING(s, "s");
+			DIM_TO_STRING(kg, "kg");
+			DIM_TO_STRING(A, "A");
+			DIM_TO_STRING(K, "K");
+			DIM_TO_STRING(mol, "mol");
+			DIM_TO_STRING(cd, "cd");
+
+#undef DIM_TO_STRING
+			
 			s_unitString = s_unitString.substr(0, s_unitString.size() - 1);
 			return s_unitString;
 		}
 
-		Type<T, t_m, t_s, t_kg>& operator+=(
-			Type<T, t_m, t_s, t_kg> const& rhs
+		RationalTypeReduced& operator+=(
+			RationalTypeReduced const& rhs
 		) {
 			return (*this) = (*this) + rhs;
 		}
 
-		Type<T, t_m, t_s, t_kg>& operator-=(
-			Type<T, t_m, t_s, t_kg> const& rhs
+		RationalTypeReduced& operator-=(
+			RationalTypeReduced const& rhs
 		) {
 			return (*this) = (*this) - rhs;
 		}
 
-		Type<T, t_m, t_s, t_kg>& operator*=(T const& rhs) {
+		RationalTypeReduced& operator*=(T const& rhs) {
 			return (*this) = (*this) * rhs;
 		}
 
-		Type<T, t_m, t_s, t_kg>& operator/=(T const& rhs) {
+		RationalTypeReduced& operator/=(T const& rhs) {
 			return (*this) = (*this) / rhs;
 		}
 
-		Type<T, t_m, t_s, t_kg>& operator*=(Type<T, 0, 0, 0> const& rhs) {
+		RationalTypeReduced& operator*=(ScalarType const& rhs) {
 			return (*this) = (*this) * rhs;
 		}
 
-		Type<T, t_m, t_s, t_kg>& operator/=(Type<T, 0, 0, 0> const& rhs) {
+		RationalTypeReduced& operator/=(ScalarType const& rhs) {
 			return (*this) = (*this) / rhs;
 		}
 	};
 
+	template<typename T,
+		intmax_t t_m_n, intmax_t t_m_d,
+		intmax_t t_s_n, intmax_t t_s_d,
+		intmax_t t_kg_n, intmax_t t_kg_d,
+		intmax_t t_A_n, intmax_t t_A_d,
+		intmax_t t_K_n, intmax_t t_K_d,
+		intmax_t t_mol_n, intmax_t t_mol_d,
+		intmax_t t_cd_n, intmax_t t_cd_d>
+	using RationalType = RationalTypeReduced<T,
+		std::ratio<t_m_n, t_m_d>::num, std::ratio<t_m_n, t_m_d>::den,
+		std::ratio<t_s_n, t_s_d>::num, std::ratio<t_s_n, t_s_d>::den,
+		std::ratio<t_kg_n, t_kg_d>::num, std::ratio<t_kg_n, t_kg_d>::den,
+		std::ratio<t_A_n, t_A_d>::num, std::ratio<t_A_n, t_A_d>::den,
+		std::ratio<t_K_n, t_K_d>::num, std::ratio<t_K_n, t_K_d>::den,
+		std::ratio<t_mol_n, t_mol_d>::num, std::ratio<t_mol_n, t_mol_d>::den,
+		std::ratio<t_cd_n, t_cd_d>::num, std::ratio<t_cd_n, t_cd_d>::den>;
+
+	/*
+	 * Arithmatic operators for combining SI values.
+	 */
+	template<typename T, intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d>
+	constexpr auto operator+(
+		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& left,
+		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& right
+	) {
+		return RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d>(left.val + right.val);
+	}
+
+	template<typename T, intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d>
+	constexpr auto operator-(
+		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& left,
+		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& right
+	) {
+		return RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d>(left.val - right.val);
+	}
+
+	template<typename T,
+		 intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d,
+		 intmax_t t_m_n2, intmax_t t_m_d2, intmax_t t_s_n2, intmax_t t_s_d2, intmax_t t_kg_n2, intmax_t t_kg_d2, intmax_t t_A_n2, intmax_t t_A_d2, intmax_t t_K_n2, intmax_t t_K_d2, intmax_t t_mol_n2, intmax_t t_mol_d2, intmax_t t_cd_n2, intmax_t t_cd_d2>
+	constexpr auto operator*(
+		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& left,
+		RationalTypeReduced<T, t_m_n2, t_m_d2, t_s_n2, t_s_d2, t_kg_n2, t_kg_d2, t_A_n2, t_A_d2, t_K_n2, t_K_d2, t_mol_n2, t_mol_d2, t_cd_n2, t_cd_d2> const& right
+	) {
+		return RationalType<T,
+		    t_m_n*t_m_d2 + t_m_n2*t_m_d, t_m_d*t_m_d2,
+		    t_s_n*t_s_d2 + t_s_n2*t_s_d, t_s_d*t_s_d2,
+		    t_kg_n*t_kg_d2 + t_kg_n2*t_kg_d, t_kg_d*t_kg_d2,
+		    t_A_n*t_A_d2 + t_A_n2*t_A_d, t_A_d*t_A_d2,
+		    t_K_n*t_K_d2 + t_K_n2*t_K_d, t_K_d*t_K_d2,
+		    t_mol_n*t_mol_d2 + t_mol_n2*t_mol_d, t_mol_d*t_mol_d2,
+		    t_cd_n*t_cd_d2 + t_cd_n2*t_cd_d, t_cd_d*t_cd_d2>(left.val * right.val);
+	}
+
+	template<typename T,
+		 intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d,
+		 intmax_t t_m_n2, intmax_t t_m_d2, intmax_t t_s_n2, intmax_t t_s_d2, intmax_t t_kg_n2, intmax_t t_kg_d2, intmax_t t_A_n2, intmax_t t_A_d2, intmax_t t_K_n2, intmax_t t_K_d2, intmax_t t_mol_n2, intmax_t t_mol_d2, intmax_t t_cd_n2, intmax_t t_cd_d2>
+	constexpr auto operator/(
+		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& left,
+		RationalTypeReduced<T, t_m_n2, t_m_d2, t_s_n2, t_s_d2, t_kg_n2, t_kg_d2, t_A_n2, t_A_d2, t_K_n2, t_K_d2, t_mol_n2, t_mol_d2, t_cd_n2, t_cd_d2> const& right
+	) {
+		return RationalType<T,
+		    t_m_n*t_m_d2 - t_m_n2*t_m_d, t_m_d*t_m_d2,
+		    t_s_n*t_s_d2 - t_s_n2*t_s_d, t_s_d*t_s_d2,
+		    t_kg_n*t_kg_d2 - t_kg_n2*t_kg_d, t_kg_d*t_kg_d2,
+		    t_A_n*t_A_d2 - t_A_n2*t_A_d, t_A_d*t_A_d2,
+		    t_K_n*t_K_d2 - t_K_n2*t_K_d, t_K_d*t_K_d2,
+		    t_mol_n*t_mol_d2 - t_mol_n2*t_mol_d, t_mol_d*t_mol_d2,
+		    t_cd_n*t_cd_d2 - t_cd_n2*t_cd_d, t_cd_d*t_cd_d2>(left.val / right.val);
+	}
+
+	/*
+	 * Unary operators, to help with literals (and general usage!)
+	 */
+
+	template<typename T, intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d>
+	constexpr auto operator-(
+		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& op
+	) {
+		return RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d>(-op.val);
+	}
+
+	template<typename T, intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d>
+	constexpr auto operator+(
+			RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& op
+	) {
+		return RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d>(op);
+	}
+
+	/*
+	 * Scalers by non-SI values (allows things like 2 * 3._m
+	 */
+
+	template<typename T, intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d, typename S>
+	constexpr auto operator*(
+		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& left,
+		S const& right
+	) {
+		return RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d>(left.val * right);
+	}
+
+	template<typename T, intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d, typename S>
+	constexpr auto operator*(
+		S const & left,
+		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& right
+	) {
+		return right * left;
+	}
+
+	template<typename T, intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d, typename S>
+	constexpr auto operator/(
+		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& left,
+		S const& right
+	) {
+		return RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d>(left.val / right);
+	}
+
+	template<typename T, intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d, typename S>
+	constexpr auto operator/(
+		S const & left,
+		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& right
+	) {
+		return RationalTypeReduced<T, -t_m_n, t_m_d, -t_s_n, t_s_d, -t_kg_n, t_kg_d, -t_A_n, t_A_d, -t_K_n, t_K_d, -t_mol_n, t_mol_d, -t_cd_n, t_cd_d>( left / right.val );
+	}
+
+	/*
+	 * Comparison operators
+	 */
+	template<typename T, intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d>
+	constexpr bool operator==(
+		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& left,
+		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& right
+	) {
+		return left.val == right.val;
+	}
+
+	template<typename T, intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d>
+	constexpr bool operator<(
+		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& left,
+		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& right
+	) {
+		return left.val < right.val;
+	}
+
+	template<typename T, intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d>
+	constexpr bool operator!=(
+		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& left,
+		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& right
+	) {
+		return !(right == left);
+	}
+
+	template<typename T, intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d>
+	constexpr bool operator<=(
+		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& left,
+		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& right
+	) {
+		return left < right || left == right;
+	}
+
+	template<typename T, intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d>
+	constexpr bool operator>(
+		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& left,
+		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& right
+	) {
+		return right < left;
+	}
+
+	template<typename T, intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d>
+	constexpr bool operator>=(
+		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& left,
+		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& right
+	) {
+		return left > right || left == right;
+	}
+
 	/*
 	 * Readable names for common types
 	 */
+
+	template<typename T, intmax_t t_m, intmax_t t_s, intmax_t t_kg, intmax_t t_A=0, intmax_t t_K=0, intmax_t t_mol=0, intmax_t t_cd=0>
+	using Type = RationalType<T, t_m, 1, t_s, 1, t_kg, 1, t_A, 1, t_K, 1, t_mol, 1, t_cd, 1>;
 
 #ifndef MESI_LITERAL_TYPE
 #	define MESI_LITERAL_TYPE float
@@ -109,159 +302,26 @@ namespace Mesi {
 	using MetersSq  = Type<MESI_LITERAL_TYPE, 2, 0, 0>;
 	using Seconds   = Type<MESI_LITERAL_TYPE, 0, 1, 0>;
 	using SecondsSq = Type<MESI_LITERAL_TYPE, 0, 2, 0>;
+	using Hertz     = Type<MESI_LITERAL_TYPE, 0, -1, 0>;
 	using Kilos     = Type<MESI_LITERAL_TYPE, 0, 0, 1>;
 	using KilosSq   = Type<MESI_LITERAL_TYPE, 0, 0, 2>;
 	using Newtons   = Type<MESI_LITERAL_TYPE, 1, -2, 1>;
 	using NewtonsSq = Type<MESI_LITERAL_TYPE, 2, -4, 2>;
-
-	/*
-	 * Arithmatic operators for combining SI values.
-	 */
-
-	template<typename T, int t_m, int t_s, int t_kg>
-	constexpr Type<T, t_m, t_s, t_kg> operator+(
-		Type<T, t_m, t_s, t_kg> const& left,
-		Type<T, t_m, t_s, t_kg> const& right
-	) {
-		return Type<T, t_m, t_s, t_kg>(left.val + right.val);
-	}
-
-	template<typename T, int t_m, int t_s, int t_kg>
-	constexpr Type<T, t_m, t_s, t_kg> operator-(
-		Type<T, t_m, t_s, t_kg> const& left,
-		Type<T, t_m, t_s, t_kg> const& right
-	) {
-		return Type<T, t_m, t_s, t_kg>(left.val - right.val);
-	}
-
-	template<typename T,
-	 	int t_m, int t_m2, int t_s, int t_s2, int t_kg, int t_kg2
-	>
-	constexpr Type<T, t_m + t_m2, t_s + t_s2, t_kg + t_kg2> operator*(
-		Type<T, t_m, t_s, t_kg> const& left,
-		Type<T, t_m2, t_s2, t_kg2> const& right
-	) {
-		return Type<T, t_m + t_m2, t_s + t_s2, t_kg + t_kg2>(
-			left.val * right.val
-		);
-	}
-
-	template<typename T,
-	 	int t_m, int t_m2, int t_s, int t_s2, int t_kg, int t_kg2
-	>
-	constexpr Type<T, t_m - t_m2, t_s - t_s2, t_kg - t_kg2> operator/(
-		Type<T, t_m, t_s, t_kg> const& left,
-		Type<T, t_m2, t_s2, t_kg2> const& right
-	) {
-		return Type<T, t_m - t_m2, t_s - t_s2, t_kg - t_kg2>(
-			left.val / right.val
-		);
-	}
-
-	/*
-	 * Unary operators, to help with literals (and general usage!)
-	 */
-
-	template<typename T, int t_m, int t_s, int t_kg>
-	constexpr Type<T, t_m, t_s, t_kg> operator-(
-		Type<T, t_m, t_s, t_kg> const& op
-	) {
-		return Type<T, t_m, t_s, t_kg>(-op.val);
-	}
-
-	template<typename T, int t_m, int t_s, int t_kg>
-	constexpr Type<T, t_m, t_s, t_kg> operator+(
-			Type<T, t_m, t_s, t_kg> const& op
-	) {
-		return op;
-	}
-
-	/*
-	 * Scalers by non-SI values (allows things like 2 * 3._m
-	 */
-
-	template<typename T, int t_m, int t_s, int t_kg, typename S>
-	constexpr Type<T, t_m, t_s, t_kg> operator*(
-		Type<T, t_m, t_s, t_kg> const& left,
-		S const& right
-	) {
-		return Type<T, t_m, t_s, t_kg>(left.val * right);
-	}
-
-	template<typename T, int t_m, int t_s, int t_kg, typename S>
-	constexpr Type<T, t_m, t_s, t_kg> operator*(
-		S const & left,
-		Type<T, t_m, t_s, t_kg> const& right
-	) {
-		return right * left;
-	}
-
-	template<typename T, int t_m, int t_s, int t_kg, typename S>
-	constexpr Type<T, t_m, t_s, t_kg> operator/(
-		Type<T, t_m, t_s, t_kg> const& left,
-		S const& right
-	) {
-		return Type<T, t_m, t_s, t_kg>(left.val / right);
-	}
-
-	template<typename T, int t_m, int t_s, int t_kg, typename S>
-	constexpr Type<T, -t_m, -t_s, -t_kg> operator/(
-		S const & left,
-		Type<T, t_m, t_s, t_kg> const& right
-	) {
-		return Type<T, -t_m, -t_s, -t_kg>( left / right.val );
-	}
-
-	/*
-	 * Comparison operators
-	 */
-	template<typename T, int t_m, int t_s, int t_kg>
-	constexpr bool operator==(
-		Type<T, t_m, t_s, t_kg> const& left,
-		Type<T, t_m, t_s, t_kg> const& right
-	) {
-		return left.val == right.val;
-	}
-
-	template<typename T, int t_m, int t_s, int t_kg>
-	constexpr bool operator<(
-		Type<T, t_m, t_s, t_kg> const& left,
-		Type<T, t_m, t_s, t_kg> const& right
-	) {
-		return left.val < right.val;
-	}
-
-	template<typename T, int t_m, int t_s, int t_kg>
-	constexpr bool operator!=(
-		Type<T, t_m, t_s, t_kg> const& left,
-		Type<T, t_m, t_s, t_kg> const& right
-	) {
-		return !(right == left);
-	}
-
-	template<typename T, int t_m, int t_s, int t_kg>
-	constexpr bool operator<=(
-		Type<T, t_m, t_s, t_kg> const& left,
-		Type<T, t_m, t_s, t_kg> const& right
-	) {
-		return left < right || left == right;
-	}
-
-	template<typename T, int t_m, int t_s, int t_kg>
-	constexpr bool operator>(
-		Type<T, t_m, t_s, t_kg> const& left,
-		Type<T, t_m, t_s, t_kg> const& right
-	) {
-		return right < left;
-	}
-
-	template<typename T, int t_m, int t_s, int t_kg>
-	constexpr bool operator>=(
-		Type<T, t_m, t_s, t_kg> const& left,
-		Type<T, t_m, t_s, t_kg> const& right
-	) {
-		return left > right || left == right;
-	}
+	using Amperes   = Type<MESI_LITERAL_TYPE, 0, 0, 0, 1>;
+	using Kelvin    = Type<MESI_LITERAL_TYPE, 0, 0, 0, 0, 1>;
+	using Moles     = Type<MESI_LITERAL_TYPE, 0, 0, 0, 0, 0, 1>;
+	using Candela   = Type<MESI_LITERAL_TYPE, 0, 0, 0, 0, 0, 0, 1>;
+	using Pascals   = decltype(Newtons(1)/MetersSq(1));
+	using Joules    = decltype(Newtons(1)*Meters(1));
+	using Watts     = decltype(Joules(1)/Seconds(1));
+	using Coulombs  = decltype(Amperes(1)*Seconds(1));
+	using Volts     = decltype(Watts(1)/Amperes(1));
+	using Farads    = decltype(Coulombs(1)/Volts(1));
+	using Ohm       = decltype(Volts(1)/Amperes(1));
+	using Siemens   = decltype(Amperes(1)/Volts(1));
+	using Webers    = decltype(Volts(1)*Seconds(1));
+	using Tesla     = decltype(Webers(1)/MetersSq(1));
+	using Henry     = decltype(Webers(1)/Amperes(1));
 
 	namespace Literals {
 	/*
