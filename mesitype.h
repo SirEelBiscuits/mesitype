@@ -156,14 +156,15 @@ namespace Mesi {
 		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
 		RationalTypeReduced<T, TYPE_B_PARAMS> const& right
 	) {
+
 		return RationalType<T,
-		    t_m_n*t_m_d2 + t_m_n2*t_m_d, t_m_d*t_m_d2,
-		    t_s_n*t_s_d2 + t_s_n2*t_s_d, t_s_d*t_s_d2,
-		    t_kg_n*t_kg_d2 + t_kg_n2*t_kg_d, t_kg_d*t_kg_d2,
-		    t_A_n*t_A_d2 + t_A_n2*t_A_d, t_A_d*t_A_d2,
-		    t_K_n*t_K_d2 + t_K_n2*t_K_d, t_K_d*t_K_d2,
-		    t_mol_n*t_mol_d2 + t_mol_n2*t_mol_d, t_mol_d*t_mol_d2,
-		    t_cd_n*t_cd_d2 + t_cd_n2*t_cd_d, t_cd_d*t_cd_d2>(left.val * right.val);
+			t_m_n*t_m_d2 + t_m_n2*t_m_d, t_m_d*t_m_d2,
+			t_s_n*t_s_d2 + t_s_n2*t_s_d, t_s_d*t_s_d2,
+			t_kg_n*t_kg_d2 + t_kg_n2*t_kg_d, t_kg_d*t_kg_d2,
+			t_A_n*t_A_d2 + t_A_n2*t_A_d, t_A_d*t_A_d2,
+			t_K_n*t_K_d2 + t_K_n2*t_K_d, t_K_d*t_K_d2,
+			t_mol_n*t_mol_d2 + t_mol_n2*t_mol_d, t_mol_d*t_mol_d2,
+			t_cd_n*t_cd_d2 + t_cd_n2*t_cd_d, t_cd_d*t_cd_d2>(left.val * right.val);
 	}
 
 	template<typename T, TYPE_A_FULL_PARAMS, TYPE_B_FULL_PARAMS>
@@ -172,13 +173,13 @@ namespace Mesi {
 		RationalTypeReduced<T, TYPE_B_PARAMS> const& right
 	) {
 		return RationalType<T,
-		    t_m_n*t_m_d2 - t_m_n2*t_m_d, t_m_d*t_m_d2,
-		    t_s_n*t_s_d2 - t_s_n2*t_s_d, t_s_d*t_s_d2,
-		    t_kg_n*t_kg_d2 - t_kg_n2*t_kg_d, t_kg_d*t_kg_d2,
-		    t_A_n*t_A_d2 - t_A_n2*t_A_d, t_A_d*t_A_d2,
-		    t_K_n*t_K_d2 - t_K_n2*t_K_d, t_K_d*t_K_d2,
-		    t_mol_n*t_mol_d2 - t_mol_n2*t_mol_d, t_mol_d*t_mol_d2,
-		    t_cd_n*t_cd_d2 - t_cd_n2*t_cd_d, t_cd_d*t_cd_d2>(left.val / right.val);
+			t_m_n*t_m_d2 - t_m_n2*t_m_d, t_m_d*t_m_d2,
+			t_s_n*t_s_d2 - t_s_n2*t_s_d, t_s_d*t_s_d2,
+			t_kg_n*t_kg_d2 - t_kg_n2*t_kg_d, t_kg_d*t_kg_d2,
+			t_A_n*t_A_d2 - t_A_n2*t_A_d, t_A_d*t_A_d2,
+			t_K_n*t_K_d2 - t_K_n2*t_K_d, t_K_d*t_K_d2,
+			t_mol_n*t_mol_d2 - t_mol_n2*t_mol_d, t_mol_d*t_mol_d2,
+			t_cd_n*t_cd_d2 - t_cd_n2*t_cd_d, t_cd_d*t_cd_d2>(left.val / right.val);
 	}
 
 	/*
