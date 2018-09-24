@@ -335,9 +335,10 @@ namespace Mesi {
 	 * Literal operators, to allow quick creation of basic types
 	 * Note that this defaults to the type set below, if no other is set
 	 * before calling!
+	 *
+	 * These are all lowercase, as user-defined literals beginning with
+	 * _[A-Z] are reserved.
 	 */
-#pragma push_macro("_N")
-#undef _N
 #define LITERAL_TYPE(T, SUFFIX) \
 			constexpr auto operator "" SUFFIX(long double arg) { return T(arg); } \
 			constexpr auto operator "" SUFFIX(unsigned long long arg) { return T(arg); }
@@ -348,25 +349,24 @@ namespace Mesi {
 		LITERAL_TYPE(Mesi::SecondsSq, _s2)
 		LITERAL_TYPE(Mesi::Kilos, _kg)
 		LITERAL_TYPE(Mesi::KilosSq, _kg2)
-		LITERAL_TYPE(Mesi::Newtons, _N)
-		LITERAL_TYPE(Mesi::NewtonsSq, _N2)
-		LITERAL_TYPE(Mesi::Hertz, _Hz)
-		LITERAL_TYPE(Mesi::Amperes, _A)
-		LITERAL_TYPE(Mesi::Kelvin, _K)
+		LITERAL_TYPE(Mesi::Newtons, _n)
+		LITERAL_TYPE(Mesi::NewtonsSq, _n2)
+		LITERAL_TYPE(Mesi::Hertz, _hz)
+		LITERAL_TYPE(Mesi::Amperes, _a)
+		LITERAL_TYPE(Mesi::Kelvin, _k)
 		LITERAL_TYPE(Mesi::Moles, _mol)
 		LITERAL_TYPE(Mesi::Candela, _cd)
-		LITERAL_TYPE(Mesi::Pascals, _Pa)
-		LITERAL_TYPE(Mesi::Joules, _J)
-		LITERAL_TYPE(Mesi::Watts, _W)
-		LITERAL_TYPE(Mesi::Coulombs, _C)
-		LITERAL_TYPE(Mesi::Volts, _V)
-		LITERAL_TYPE(Mesi::Farads, _F)
+		LITERAL_TYPE(Mesi::Pascals, _pa)
+		LITERAL_TYPE(Mesi::Joules, _j)
+		LITERAL_TYPE(Mesi::Watts, _w)
+		LITERAL_TYPE(Mesi::Coulombs, _c)
+		LITERAL_TYPE(Mesi::Volts, _v)
+		LITERAL_TYPE(Mesi::Farads, _f)
 		LITERAL_TYPE(Mesi::Ohms, _ohm)
-		LITERAL_TYPE(Mesi::Siemens, _S)
-		LITERAL_TYPE(Mesi::Webers, _Wb)
-		LITERAL_TYPE(Mesi::Tesla, _T)
-		LITERAL_TYPE(Mesi::Henry, _H)
+		LITERAL_TYPE(Mesi::Siemens, _siemens)
+		LITERAL_TYPE(Mesi::Webers, _wb)
+		LITERAL_TYPE(Mesi::Tesla, _t)
+		LITERAL_TYPE(Mesi::Henry, _h)
 #undef LITERAL_TYPE
 	}
-#pragma pop_macro("_N")
 }
