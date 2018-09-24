@@ -311,11 +311,11 @@ namespace Mesi {
 	using MetersSq  = Type<MESI_LITERAL_TYPE, 2, 0, 0>;
 	using Seconds   = Type<MESI_LITERAL_TYPE, 0, 1, 0>;
 	using SecondsSq = Type<MESI_LITERAL_TYPE, 0, 2, 0>;
-	using Hertz     = Type<MESI_LITERAL_TYPE, 0, -1, 0>;
 	using Kilos     = Type<MESI_LITERAL_TYPE, 0, 0, 1>;
 	using KilosSq   = Type<MESI_LITERAL_TYPE, 0, 0, 2>;
 	using Newtons   = Type<MESI_LITERAL_TYPE, 1, -2, 1>;
 	using NewtonsSq = Type<MESI_LITERAL_TYPE, 2, -4, 2>;
+	using Hertz     = Type<MESI_LITERAL_TYPE, 0, -1, 0>;
 	using Amperes   = Type<MESI_LITERAL_TYPE, 0, 0, 0, 1>;
 	using Kelvin    = Type<MESI_LITERAL_TYPE, 0, 0, 0, 0, 1>;
 	using Moles     = Type<MESI_LITERAL_TYPE, 0, 0, 0, 0, 0, 1>;
@@ -326,7 +326,7 @@ namespace Mesi {
 	using Coulombs  = decltype(Amperes(1)*Seconds(1));
 	using Volts     = decltype(Watts(1)/Amperes(1));
 	using Farads    = decltype(Coulombs(1)/Volts(1));
-	using Ohm       = decltype(Volts(1)/Amperes(1));
+	using Ohms      = decltype(Volts(1)/Amperes(1));
 	using Siemens   = decltype(Amperes(1)/Volts(1));
 	using Webers    = decltype(Volts(1)*Seconds(1));
 	using Tesla     = decltype(Webers(1)/MetersSq(1));
@@ -340,70 +340,35 @@ namespace Mesi {
 	 */
 #pragma push_macro("_N")
 #undef _N
+#define LITERAL_TYPE(T, SUFFIX) \
+			constexpr auto operator "" SUFFIX(long double arg) { return T(arg); } \
+			constexpr auto operator "" SUFFIX(unsigned long long arg) { return T(arg); }
 
-		constexpr Mesi::Meters operator "" _m(long double arg) {
-			return Mesi::Meters(arg);
-		}
-
-		constexpr Mesi::Seconds operator "" _s(long double arg) {
-			return Mesi::Seconds(arg);
-		}
-
-		constexpr Mesi::Kilos operator "" _kg(long double arg) {
-			return Mesi::Kilos(arg);
-		}
-
-		constexpr Mesi::Newtons operator "" _N(long double arg) {
-			return Mesi::Newtons(arg);
-		}
-
-		constexpr Mesi::Meters operator "" _m(unsigned long long arg) {
-			return Mesi::Meters(arg);
-		}
-
-		constexpr Mesi::Seconds operator "" _s(unsigned long long arg) {
-			return Mesi::Seconds(arg);
-		}
-
-		constexpr Mesi::Kilos operator "" _kg(unsigned long long arg) {
-			return Mesi::Kilos(arg);
-		}
-
-		constexpr Mesi::Newtons operator "" _N(unsigned long long arg) {
-			return Mesi::Newtons(arg);
-		}
-
-		constexpr Mesi::MetersSq operator "" _m2(long double arg) {
-			return Mesi::MetersSq(arg);
-		}
-
-		constexpr Mesi::SecondsSq operator "" _s2(long double arg) {
-			return Mesi::SecondsSq(arg);
-		}
-
-		constexpr Mesi::KilosSq operator "" _kg2(long double arg) {
-			return Mesi::KilosSq(arg);
-		}
-
-		constexpr Mesi::NewtonsSq operator "" _N2(long double arg) {
-			return Mesi::NewtonsSq(arg);
-		}
-
-		constexpr Mesi::MetersSq operator "" _m2(unsigned long long arg) {
-			return Mesi::MetersSq(arg);
-		}
-
-		constexpr Mesi::SecondsSq operator "" _s2(unsigned long long arg) {
-			return Mesi::SecondsSq(arg);
-		}
-
-		constexpr Mesi::KilosSq operator "" _kg2(unsigned long long arg) {
-			return Mesi::KilosSq(arg);
-		}
-
-		constexpr Mesi::NewtonsSq operator "" _N2(unsigned long long arg) {
-			return Mesi::NewtonsSq(arg);
-		}
+		LITERAL_TYPE(Mesi::Meters, _m)
+		LITERAL_TYPE(Mesi::MetersSq, _m2)
+		LITERAL_TYPE(Mesi::Seconds, _s)
+		LITERAL_TYPE(Mesi::SecondsSq, _s2)
+		LITERAL_TYPE(Mesi::Kilos, _kg)
+		LITERAL_TYPE(Mesi::KilosSq, _kg2)
+		LITERAL_TYPE(Mesi::Newtons, _N)
+		LITERAL_TYPE(Mesi::NewtonsSq, _N2)
+		LITERAL_TYPE(Mesi::Hertz, _Hz)
+		LITERAL_TYPE(Mesi::Amperes, _A)
+		LITERAL_TYPE(Mesi::Kelvin, _K)
+		LITERAL_TYPE(Mesi::Moles, _mol)
+		LITERAL_TYPE(Mesi::Candela, _cd)
+		LITERAL_TYPE(Mesi::Pascals, _Pa)
+		LITERAL_TYPE(Mesi::Joules, _J)
+		LITERAL_TYPE(Mesi::Watts, _W)
+		LITERAL_TYPE(Mesi::Coulombs, _C)
+		LITERAL_TYPE(Mesi::Volts, _V)
+		LITERAL_TYPE(Mesi::Farads, _F)
+		LITERAL_TYPE(Mesi::Ohms, _ohm)
+		LITERAL_TYPE(Mesi::Siemens, _S)
+		LITERAL_TYPE(Mesi::Webers, _Wb)
+		LITERAL_TYPE(Mesi::Tesla, _T)
+		LITERAL_TYPE(Mesi::Henry, _H)
+#undef LITERAL_TYPE
 	}
 #pragma pop_macro("_N")
 }
