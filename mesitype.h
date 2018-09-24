@@ -8,15 +8,23 @@ namespace Mesi {
 	 * @brief Main class to store SI types
 	 *
 	 * @param T storage type parameter
-	 * @param t_m number of dimensions of meters, e.g., t_m == 2 => m^2
-	 * @param t_s similar to t_m, but seconds
-	 * @param t_kg similar to t_m, but kilograms
+	 * @param t_m_n, t_m_d number of dimensions of meters as a rational number, e.g., t_m_n/t_m_d == 2 => m^2
+	 * @param t_s_* similar to t_m, but seconds
+	 * @param t_kg_* similar to t_m, but kilograms
+	 * @param t_A_* similar to t_m, but amperes
+	 * @param t_K_* similar to t_m, but Kelvin
+	 * @param t_mol_* similar to t_m, but moles
+	 * @param t_cd_* similar to t_m, but candela
 	 *
 	 * This class is to enforce compile-time checking, and where possible,
 	 * compile-time calculation of SI values using constexpr.
 	 *
 	 * Note: MESI_LITERAL_TYPE may be defined to set the storage type
 	 * used by the operator literal overloads
+	 *
+	 * Note: Fractions must be reduced, i.e. the greatest common divisor
+	 * of numerator and denominator must be 1. To prevent compile-time
+	 * errors, use RationalType<>, which reduces fractions automatically.
 	 *
 	 * @author Jameson Thatcher (a.k.a. SirEel)
 	 *
