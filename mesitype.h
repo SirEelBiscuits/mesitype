@@ -74,15 +74,16 @@ namespace Mesi {
 			static std::string s_unitString("");
 			if( s_unitString.size() > 0 )
 				return s_unitString;
-#define DIM_TO_STRING(TP, NAME) if( t_##TP##_n == 1 && t_##TP##_d == 1 ) s_unitString += std::string(#NAME) + " "; else if( t_##TP##_n != 0 && t_##TP##_d == 1) s_unitString += std::string(#NAME) + "^" + std::to_string(static_cast<long long>(t_##TP##_n)) + " "; else s_unitString += std::string(#NAME) + "^(" + std::to_string(static_cast<long long>(t_##TP##_n)) + "/" + std::to_string(static_cast<long long>(t_##TP##_d)) + ") ";
 
-			DIM_TO_STRING(m, "m");
-			DIM_TO_STRING(s, "s");
-			DIM_TO_STRING(kg, "kg");
-			DIM_TO_STRING(A, "A");
-			DIM_TO_STRING(K, "K");
-			DIM_TO_STRING(mol, "mol");
-			DIM_TO_STRING(cd, "cd");
+#define DIM_TO_STRING(TP) if( t_##TP##_n == 1 && t_##TP##_d == 1 ) s_unitString += std::string(#TP) + " "; else if( t_##TP##_n != 0 && t_##TP##_d == 1) s_unitString += std::string(#TP) + "^" + std::to_string(static_cast<long long>(t_##TP##_n)) + " "; else s_unitString += std::string(#TP) + "^(" + std::to_string(static_cast<long long>(t_##TP##_n)) + "/" + std::to_string(static_cast<long long>(t_##TP##_d)) + ") ";
+
+			DIM_TO_STRING(m);
+			DIM_TO_STRING(s);
+			DIM_TO_STRING(kg);
+			DIM_TO_STRING(A);
+			DIM_TO_STRING(K);
+			DIM_TO_STRING(mol);
+			DIM_TO_STRING(cd);
 
 #undef DIM_TO_STRING
 			
