@@ -1,15 +1,23 @@
 #pragma once
 
 #include <string>
+#include <ratio>
 
 namespace Mesi {
+/* Utility macro for applying another macro to all known units, for internal use only */
+#define ALL_UNITS(op) op(m) op(s) op(kg) op(A) op(K) op(mol) op(cd)
+
 	/**
 	 * @brief Main class to store SI types
 	 *
 	 * @param T storage type parameter
-	 * @param t_m number of dimensions of meters, e.g., t_m == 2 => m^2
-	 * @param t_s similar to t_m, but seconds
-	 * @param t_kg similar to t_m, but kilograms
+	 * @param t_m_n, t_m_d number of dimensions of meters as a rational number, e.g., t_m_n/t_m_d == 2 => m^2
+	 * @param t_s_* similar to t_m, but seconds
+	 * @param t_kg_* similar to t_m, but kilograms
+	 * @param t_A_* similar to t_m, but amperes
+	 * @param t_K_* similar to t_m, but Kelvin
+	 * @param t_mol_* similar to t_m, but moles
+	 * @param t_cd_* similar to t_m, but candela
 	 *
 	 * This class is to enforce compile-time checking, and where possible,
 	 * compile-time calculation of SI values using constexpr.
@@ -17,22 +25,44 @@ namespace Mesi {
 	 * Note: MESI_LITERAL_TYPE may be defined to set the storage type
 	 * used by the operator literal overloads
 	 *
+	 * Note: Fractions must be reduced, i.e. the greatest common divisor
+	 * of numerator and denominator must be 1. To prevent compile-time
+	 * errors, use RationalType<>, which reduces fractions automatically.
+	 *
 	 * @author Jameson Thatcher (a.k.a. SirEel)
 	 *
 	 */
-	template<typename T, int t_m, int t_s, int t_kg>
-	struct Type {
+	template<typename T,
+		intmax_t t_m_n, intmax_t t_m_d,
+		intmax_t t_s_n, intmax_t t_s_d,
+		intmax_t t_kg_n, intmax_t t_kg_d,
+		intmax_t t_A_n, intmax_t t_A_d,
+		intmax_t t_K_n, intmax_t t_K_d,
+		intmax_t t_mol_n, intmax_t t_mol_d,
+		intmax_t t_cd_n, intmax_t t_cd_d>
+	struct RationalTypeReduced
+	{
 		using BaseType = T;
+		using ScalarType = RationalTypeReduced<T, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1>;
+
+		static_assert(std::ratio<t_m_n, t_m_d>::num == t_m_n, "The meter exponent fraction is not irreducible");
+		static_assert(std::ratio<t_s_n, t_s_d>::num == t_s_n, "The second exponent fraction is not irreducible");
+		static_assert(std::ratio<t_kg_n, t_kg_d>::num == t_kg_n, "The kilogram exponent fraction is not irreducible");
+		static_assert(std::ratio<t_A_n, t_A_d>::num == t_A_n, "The ampere exponent fraction is not irreducible");
+		static_assert(std::ratio<t_K_n, t_K_d>::num == t_K_n, "The Kelvin exponent fraction is not irreducible");
+		static_assert(std::ratio<t_mol_n, t_mol_d>::num == t_mol_n, "The mole exponent fraction is not irreducible");
+		static_assert(std::ratio<t_cd_n, t_cd_d>::num == t_cd_n, "The candela exponent fraction is not irreducible");
+
 		T val;
 
-		constexpr Type()
+		constexpr RationalTypeReduced()
 		{}
 
-		constexpr explicit Type(T const in)
+		constexpr explicit RationalTypeReduced(T const in)
 			:val(in)
 		{}
 
-		constexpr Type(Type const& in)
+		constexpr RationalTypeReduced(RationalTypeReduced const& in)
 			:val(in.val)
 		{}
 
@@ -48,57 +78,224 @@ namespace Mesi {
 			if( s_unitString.size() > 0 )
 				return s_unitString;
 
-			if( t_m == 1 )
-				s_unitString += "m ";
-			else if( t_m != 0 )
-				s_unitString += "m^"
-					+ std::to_string(static_cast<long long>(t_m)) + " ";
-			if( t_s == 1 )
-				s_unitString += "s ";
-			else if( t_s != 0 )
-				s_unitString += "s^"
-					+ std::to_string(static_cast<long long>(t_s)) + " ";
-			if( t_kg == 1 )
-				s_unitString += "kg ";
-			else if( t_kg != 0 )
-				s_unitString += "kg^"
-					+ std::to_string(static_cast<long long>(t_kg)) + " ";
+#define DIM_TO_STRING(TP) if( t_##TP##_n == 1 && t_##TP##_d == 1 ) s_unitString += std::string(#TP) + " "; else if( t_##TP##_n != 0 && t_##TP##_d == 1) s_unitString += std::string(#TP) + "^" + std::to_string(static_cast<long long>(t_##TP##_n)) + " "; else if(t_##TP##_n != 0) s_unitString += std::string(#TP) + "^(" + std::to_string(static_cast<long long>(t_##TP##_n)) + "/" + std::to_string(static_cast<long long>(t_##TP##_d)) + ") ";
+			ALL_UNITS(DIM_TO_STRING)
+#undef DIM_TO_STRING
+			
 			s_unitString = s_unitString.substr(0, s_unitString.size() - 1);
 			return s_unitString;
 		}
 
-		Type<T, t_m, t_s, t_kg>& operator+=(
-			Type<T, t_m, t_s, t_kg> const& rhs
+		RationalTypeReduced& operator+=(
+			RationalTypeReduced const& rhs
 		) {
 			return (*this) = (*this) + rhs;
 		}
 
-		Type<T, t_m, t_s, t_kg>& operator-=(
-			Type<T, t_m, t_s, t_kg> const& rhs
+		RationalTypeReduced& operator-=(
+			RationalTypeReduced const& rhs
 		) {
 			return (*this) = (*this) - rhs;
 		}
 
-		Type<T, t_m, t_s, t_kg>& operator*=(T const& rhs) {
+		RationalTypeReduced& operator*=(T const& rhs) {
 			return (*this) = (*this) * rhs;
 		}
 
-		Type<T, t_m, t_s, t_kg>& operator/=(T const& rhs) {
+		RationalTypeReduced& operator/=(T const& rhs) {
 			return (*this) = (*this) / rhs;
 		}
 
-		Type<T, t_m, t_s, t_kg>& operator*=(Type<T, 0, 0, 0> const& rhs) {
+		RationalTypeReduced& operator*=(ScalarType const& rhs) {
 			return (*this) = (*this) * rhs;
 		}
 
-		Type<T, t_m, t_s, t_kg>& operator/=(Type<T, 0, 0, 0> const& rhs) {
+		RationalTypeReduced& operator/=(ScalarType const& rhs) {
 			return (*this) = (*this) / rhs;
 		}
 	};
 
+	template<typename T,
+		intmax_t t_m_n, intmax_t t_m_d,
+		intmax_t t_s_n, intmax_t t_s_d,
+		intmax_t t_kg_n, intmax_t t_kg_d,
+		intmax_t t_A_n, intmax_t t_A_d,
+		intmax_t t_K_n, intmax_t t_K_d,
+		intmax_t t_mol_n, intmax_t t_mol_d,
+		intmax_t t_cd_n, intmax_t t_cd_d>
+	using RationalType = RationalTypeReduced<T,
+		std::ratio<t_m_n, t_m_d>::num, std::ratio<t_m_n, t_m_d>::den,
+		std::ratio<t_s_n, t_s_d>::num, std::ratio<t_s_n, t_s_d>::den,
+		std::ratio<t_kg_n, t_kg_d>::num, std::ratio<t_kg_n, t_kg_d>::den,
+		std::ratio<t_A_n, t_A_d>::num, std::ratio<t_A_n, t_A_d>::den,
+		std::ratio<t_K_n, t_K_d>::num, std::ratio<t_K_n, t_K_d>::den,
+		std::ratio<t_mol_n, t_mol_d>::num, std::ratio<t_mol_n, t_mol_d>::den,
+		std::ratio<t_cd_n, t_cd_d>::num, std::ratio<t_cd_n, t_cd_d>::den>;
+
+#define TYPE_A_FULL_PARAMS intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d
+#define TYPE_A_PARAMS t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d
+#define TYPE_B_FULL_PARAMS intmax_t t_m_n2, intmax_t t_m_d2, intmax_t t_s_n2, intmax_t t_s_d2, intmax_t t_kg_n2, intmax_t t_kg_d2, intmax_t t_A_n2, intmax_t t_A_d2, intmax_t t_K_n2, intmax_t t_K_d2, intmax_t t_mol_n2, intmax_t t_mol_d2, intmax_t t_cd_n2, intmax_t t_cd_d2
+#define TYPE_B_PARAMS t_m_n2, t_m_d2, t_s_n2, t_s_d2, t_kg_n2, t_kg_d2, t_A_n2, t_A_d2, t_K_n2, t_K_d2, t_mol_n2, t_mol_d2, t_cd_n2, t_cd_d2
+	/*
+	 * Arithmatic operators for combining SI values.
+	 */
+	template<typename T, TYPE_A_FULL_PARAMS>
+	constexpr auto operator+(
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& right
+	) {
+		return RationalTypeReduced<T, TYPE_A_PARAMS>(left.val + right.val);
+	}
+
+	template<typename T, TYPE_A_FULL_PARAMS>
+	constexpr auto operator-(
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& right
+	) {
+		return RationalTypeReduced<T, TYPE_A_PARAMS>(left.val - right.val);
+	}
+
+	template<typename T, TYPE_A_FULL_PARAMS, TYPE_B_FULL_PARAMS>
+	constexpr auto operator*(
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
+		RationalTypeReduced<T, TYPE_B_PARAMS> const& right
+	) {
+#define ADD_FRAC(TP) using TP = std::ratio_add<std::ratio<t_##TP##_n, t_##TP##_d>, std::ratio<t_##TP##_n2, t_##TP##_d2>>;
+		ALL_UNITS(ADD_FRAC)
+#undef ADD_FRAC
+		return RationalType<T, m::num, m::den, s::num, s::den, kg::num, kg::den, A::num, A::den, K::num, K::den, mol::num, mol::den, cd::num, cd::den>(left.val * right.val);
+	}
+
+	template<typename T, TYPE_A_FULL_PARAMS, TYPE_B_FULL_PARAMS>
+	constexpr auto operator/(
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
+		RationalTypeReduced<T, TYPE_B_PARAMS> const& right
+	) {
+#define SUB_FRAC(TP) using TP = std::ratio_subtract<std::ratio<t_##TP##_n, t_##TP##_d>, std::ratio<t_##TP##_n2, t_##TP##_d2>>;
+		ALL_UNITS(SUB_FRAC)
+	#undef SUB_FRAC
+		return RationalType<T, m::num, m::den, s::num, s::den, kg::num, kg::den, A::num, A::den, K::num, K::den, mol::num, mol::den, cd::num, cd::den>(left.val / right.val);
+	}
+
+	/*
+	 * Unary operators, to help with literals (and general usage!)
+	 */
+
+	template<typename T, TYPE_A_FULL_PARAMS>
+	constexpr auto operator-(
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& op
+	) {
+		return RationalTypeReduced<T, TYPE_A_PARAMS>(-op.val);
+	}
+
+	template<typename T, TYPE_A_FULL_PARAMS>
+	constexpr auto operator+(
+			RationalTypeReduced<T, TYPE_A_PARAMS> const& op
+	) {
+		return RationalTypeReduced<T, TYPE_A_PARAMS>(op);
+	}
+
+	/*
+	 * Scalers by non-SI values (allows things like 2 * 3._m
+	 */
+
+	template<typename T, TYPE_A_FULL_PARAMS, typename S>
+	constexpr auto operator*(
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
+		S const& right
+	) {
+		return RationalTypeReduced<T, TYPE_A_PARAMS>(left.val * right);
+	}
+
+	template<typename T, TYPE_A_FULL_PARAMS, typename S>
+	constexpr auto operator*(
+		S const & left,
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& right
+	) {
+		return right * left;
+	}
+
+	template<typename T, TYPE_A_FULL_PARAMS, typename S>
+	constexpr auto operator/(
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
+		S const& right
+	) {
+		using Scalar = typename RationalTypeReduced<T, TYPE_A_PARAMS>::ScalarType;
+		return left / Scalar(T(right));
+	}
+
+	template<typename T, TYPE_A_FULL_PARAMS, typename S>
+	constexpr auto operator/(
+		S const & left,
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& right
+	) {
+		using Scalar = typename RationalTypeReduced<T, TYPE_A_PARAMS>::ScalarType;
+		return Scalar(T(left)) / right;
+	}
+
+	/*
+	 * Comparison operators
+	 */
+	template<typename T, TYPE_A_FULL_PARAMS>
+	constexpr bool operator==(
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& right
+	) {
+		return left.val == right.val;
+	}
+
+	template<typename T, TYPE_A_FULL_PARAMS>
+	constexpr bool operator<(
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& right
+	) {
+		return left.val < right.val;
+	}
+
+	template<typename T, TYPE_A_FULL_PARAMS>
+	constexpr bool operator!=(
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& right
+	) {
+		return !(right == left);
+	}
+
+	template<typename T, TYPE_A_FULL_PARAMS>
+	constexpr bool operator<=(
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& right
+	) {
+		return left < right || left == right;
+	}
+
+	template<typename T, TYPE_A_FULL_PARAMS>
+	constexpr bool operator>(
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& right
+	) {
+		return right < left;
+	}
+
+	template<typename T, TYPE_A_FULL_PARAMS>
+	constexpr bool operator>=(
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& right
+	) {
+		return left > right || left == right;
+	}
+
+#undef TYPE_A_FULL_PARAMS
+#undef TYPE_A_PARAMS
+#undef TYPE_B_FULL_PARAMS
+#undef TYPE_B_PARAMS
+#undef ALL_UNITS
+
 	/*
 	 * Readable names for common types
 	 */
+
+	template<typename T, intmax_t t_m, intmax_t t_s, intmax_t t_kg, intmax_t t_A=0, intmax_t t_K=0, intmax_t t_mol=0, intmax_t t_cd=0>
+	using Type = RationalType<T, t_m, 1, t_s, 1, t_kg, 1, t_A, 1, t_K, 1, t_mol, 1, t_cd, 1>;
 
 #ifndef MESI_LITERAL_TYPE
 #	define MESI_LITERAL_TYPE float
@@ -106,235 +303,69 @@ namespace Mesi {
 
 	using Scalar    = Type<MESI_LITERAL_TYPE, 0, 0, 0>;
 	using Meters    = Type<MESI_LITERAL_TYPE, 1, 0, 0>;
-	using MetersSq  = Type<MESI_LITERAL_TYPE, 2, 0, 0>;
 	using Seconds   = Type<MESI_LITERAL_TYPE, 0, 1, 0>;
-	using SecondsSq = Type<MESI_LITERAL_TYPE, 0, 2, 0>;
 	using Kilos     = Type<MESI_LITERAL_TYPE, 0, 0, 1>;
-	using KilosSq   = Type<MESI_LITERAL_TYPE, 0, 0, 2>;
-	using Newtons   = Type<MESI_LITERAL_TYPE, 1, -2, 1>;
-	using NewtonsSq = Type<MESI_LITERAL_TYPE, 2, -4, 2>;
-
-	/*
-	 * Arithmatic operators for combining SI values.
-	 */
-
-	template<typename T, int t_m, int t_s, int t_kg>
-	constexpr Type<T, t_m, t_s, t_kg> operator+(
-		Type<T, t_m, t_s, t_kg> const& left,
-		Type<T, t_m, t_s, t_kg> const& right
-	) {
-		return Type<T, t_m, t_s, t_kg>(left.val + right.val);
-	}
-
-	template<typename T, int t_m, int t_s, int t_kg>
-	constexpr Type<T, t_m, t_s, t_kg> operator-(
-		Type<T, t_m, t_s, t_kg> const& left,
-		Type<T, t_m, t_s, t_kg> const& right
-	) {
-		return Type<T, t_m, t_s, t_kg>(left.val - right.val);
-	}
-
-	template<typename T,
-	 	int t_m, int t_m2, int t_s, int t_s2, int t_kg, int t_kg2
-	>
-	constexpr Type<T, t_m + t_m2, t_s + t_s2, t_kg + t_kg2> operator*(
-		Type<T, t_m, t_s, t_kg> const& left,
-		Type<T, t_m2, t_s2, t_kg2> const& right
-	) {
-		return Type<T, t_m + t_m2, t_s + t_s2, t_kg + t_kg2>(
-			left.val * right.val
-		);
-	}
-
-	template<typename T,
-	 	int t_m, int t_m2, int t_s, int t_s2, int t_kg, int t_kg2
-	>
-	constexpr Type<T, t_m - t_m2, t_s - t_s2, t_kg - t_kg2> operator/(
-		Type<T, t_m, t_s, t_kg> const& left,
-		Type<T, t_m2, t_s2, t_kg2> const& right
-	) {
-		return Type<T, t_m - t_m2, t_s - t_s2, t_kg - t_kg2>(
-			left.val / right.val
-		);
-	}
-
-	/*
-	 * Unary operators, to help with literals (and general usage!)
-	 */
-
-	template<typename T, int t_m, int t_s, int t_kg>
-	constexpr Type<T, t_m, t_s, t_kg> operator-(
-		Type<T, t_m, t_s, t_kg> const& op
-	) {
-		return Type<T, t_m, t_s, t_kg>(-op.val);
-	}
-
-	template<typename T, int t_m, int t_s, int t_kg>
-	constexpr Type<T, t_m, t_s, t_kg> operator+(
-			Type<T, t_m, t_s, t_kg> const& op
-	) {
-		return op;
-	}
-
-	/*
-	 * Scalers by non-SI values (allows things like 2 * 3._m
-	 */
-
-	template<typename T, int t_m, int t_s, int t_kg, typename S>
-	constexpr Type<T, t_m, t_s, t_kg> operator*(
-		Type<T, t_m, t_s, t_kg> const& left,
-		S const& right
-	) {
-		return Type<T, t_m, t_s, t_kg>(left.val * right);
-	}
-
-	template<typename T, int t_m, int t_s, int t_kg, typename S>
-	constexpr Type<T, t_m, t_s, t_kg> operator*(
-		S const & left,
-		Type<T, t_m, t_s, t_kg> const& right
-	) {
-		return right * left;
-	}
-
-	template<typename T, int t_m, int t_s, int t_kg, typename S>
-	constexpr Type<T, t_m, t_s, t_kg> operator/(
-		Type<T, t_m, t_s, t_kg> const& left,
-		S const& right
-	) {
-		return Type<T, t_m, t_s, t_kg>(left.val / right);
-	}
-
-	template<typename T, int t_m, int t_s, int t_kg, typename S>
-	constexpr Type<T, -t_m, -t_s, -t_kg> operator/(
-		S const & left,
-		Type<T, t_m, t_s, t_kg> const& right
-	) {
-		return Type<T, -t_m, -t_s, -t_kg>( left / right.val );
-	}
-
-	/*
-	 * Comparison operators
-	 */
-	template<typename T, int t_m, int t_s, int t_kg>
-	constexpr bool operator==(
-		Type<T, t_m, t_s, t_kg> const& left,
-		Type<T, t_m, t_s, t_kg> const& right
-	) {
-		return left.val == right.val;
-	}
-
-	template<typename T, int t_m, int t_s, int t_kg>
-	constexpr bool operator<(
-		Type<T, t_m, t_s, t_kg> const& left,
-		Type<T, t_m, t_s, t_kg> const& right
-	) {
-		return left.val < right.val;
-	}
-
-	template<typename T, int t_m, int t_s, int t_kg>
-	constexpr bool operator!=(
-		Type<T, t_m, t_s, t_kg> const& left,
-		Type<T, t_m, t_s, t_kg> const& right
-	) {
-		return !(right == left);
-	}
-
-	template<typename T, int t_m, int t_s, int t_kg>
-	constexpr bool operator<=(
-		Type<T, t_m, t_s, t_kg> const& left,
-		Type<T, t_m, t_s, t_kg> const& right
-	) {
-		return left < right || left == right;
-	}
-
-	template<typename T, int t_m, int t_s, int t_kg>
-	constexpr bool operator>(
-		Type<T, t_m, t_s, t_kg> const& left,
-		Type<T, t_m, t_s, t_kg> const& right
-	) {
-		return right < left;
-	}
-
-	template<typename T, int t_m, int t_s, int t_kg>
-	constexpr bool operator>=(
-		Type<T, t_m, t_s, t_kg> const& left,
-		Type<T, t_m, t_s, t_kg> const& right
-	) {
-		return left > right || left == right;
-	}
+	using Amperes   = Type<MESI_LITERAL_TYPE, 0, 0, 0, 1>;
+	using Kelvin    = Type<MESI_LITERAL_TYPE, 0, 0, 0, 0, 1>;
+	using Moles     = Type<MESI_LITERAL_TYPE, 0, 0, 0, 0, 0, 1>;
+	using Candela   = Type<MESI_LITERAL_TYPE, 0, 0, 0, 0, 0, 0, 1>;
+	using Newtons   = decltype(Meters{} * Kilos{} / Seconds{} / Seconds{});
+	using NewtonsSq = decltype(Newtons{} * Newtons{});
+	using MetersSq  = decltype(Meters{} * Meters{});
+	using MetersCu  = decltype(Meters{} * MetersSq{});
+	using SecondsSq = decltype(Seconds{} * Seconds{});
+	using KilosSq   = decltype(Kilos{} * Kilos{});
+	using Hertz     = decltype(Scalar{} / Seconds{});
+	using Pascals   = decltype(Newtons{} / MetersSq{});
+	using Joules    = decltype(Newtons{} * Meters{});
+	using Watts     = decltype(Joules{} / Seconds{});
+	using Coulombs  = decltype(Amperes{} * Seconds{});
+	using Volts     = decltype(Watts{} / Amperes{});
+	using Farads    = decltype(Coulombs{} / Volts{});
+	using Ohms      = decltype(Volts{} / Amperes{});
+	using Siemens   = decltype(Amperes{} / Volts{});
+	using Webers    = decltype(Volts{} * Seconds{});
+	using Tesla     = decltype(Webers{} / MetersSq{});
+	using Henry     = decltype(Webers{} / Amperes{});
 
 	namespace Literals {
 	/*
 	 * Literal operators, to allow quick creation of basic types
 	 * Note that this defaults to the type set below, if no other is set
 	 * before calling!
+	 *
+	 * These are all lowercase, as identifiers beginning with
+	 * _[A-Z] are reserved.
 	 */
-#pragma push_macro("_N")
-#undef _N
+#define LITERAL_TYPE(T, SUFFIX) \
+			constexpr auto operator "" SUFFIX(long double arg) { return T(arg); } \
+			constexpr auto operator "" SUFFIX(unsigned long long arg) { return T(arg); }
 
-		constexpr Mesi::Meters operator "" _m(long double arg) {
-			return Mesi::Meters(arg);
-		}
-
-		constexpr Mesi::Seconds operator "" _s(long double arg) {
-			return Mesi::Seconds(arg);
-		}
-
-		constexpr Mesi::Kilos operator "" _kg(long double arg) {
-			return Mesi::Kilos(arg);
-		}
-
-		constexpr Mesi::Newtons operator "" _N(long double arg) {
-			return Mesi::Newtons(arg);
-		}
-
-		constexpr Mesi::Meters operator "" _m(unsigned long long arg) {
-			return Mesi::Meters(arg);
-		}
-
-		constexpr Mesi::Seconds operator "" _s(unsigned long long arg) {
-			return Mesi::Seconds(arg);
-		}
-
-		constexpr Mesi::Kilos operator "" _kg(unsigned long long arg) {
-			return Mesi::Kilos(arg);
-		}
-
-		constexpr Mesi::Newtons operator "" _N(unsigned long long arg) {
-			return Mesi::Newtons(arg);
-		}
-
-		constexpr Mesi::MetersSq operator "" _m2(long double arg) {
-			return Mesi::MetersSq(arg);
-		}
-
-		constexpr Mesi::SecondsSq operator "" _s2(long double arg) {
-			return Mesi::SecondsSq(arg);
-		}
-
-		constexpr Mesi::KilosSq operator "" _kg2(long double arg) {
-			return Mesi::KilosSq(arg);
-		}
-
-		constexpr Mesi::NewtonsSq operator "" _N2(long double arg) {
-			return Mesi::NewtonsSq(arg);
-		}
-
-		constexpr Mesi::MetersSq operator "" _m2(unsigned long long arg) {
-			return Mesi::MetersSq(arg);
-		}
-
-		constexpr Mesi::SecondsSq operator "" _s2(unsigned long long arg) {
-			return Mesi::SecondsSq(arg);
-		}
-
-		constexpr Mesi::KilosSq operator "" _kg2(unsigned long long arg) {
-			return Mesi::KilosSq(arg);
-		}
-
-		constexpr Mesi::NewtonsSq operator "" _N2(unsigned long long arg) {
-			return Mesi::NewtonsSq(arg);
-		}
+		LITERAL_TYPE(Mesi::Meters, _m)
+		LITERAL_TYPE(Mesi::MetersSq, _m2)
+		LITERAL_TYPE(Mesi::MetersCu, _m3)
+		LITERAL_TYPE(Mesi::Seconds, _s)
+		LITERAL_TYPE(Mesi::SecondsSq, _s2)
+		LITERAL_TYPE(Mesi::Kilos, _kg)
+		LITERAL_TYPE(Mesi::KilosSq, _kg2)
+		LITERAL_TYPE(Mesi::Newtons, _n)
+		LITERAL_TYPE(Mesi::NewtonsSq, _n2)
+		LITERAL_TYPE(Mesi::Hertz, _hz)
+		LITERAL_TYPE(Mesi::Amperes, _a)
+		LITERAL_TYPE(Mesi::Kelvin, _k)
+		LITERAL_TYPE(Mesi::Moles, _mol)
+		LITERAL_TYPE(Mesi::Candela, _cd)
+		LITERAL_TYPE(Mesi::Pascals, _pa)
+		LITERAL_TYPE(Mesi::Joules, _j)
+		LITERAL_TYPE(Mesi::Watts, _w)
+		LITERAL_TYPE(Mesi::Coulombs, _c)
+		LITERAL_TYPE(Mesi::Volts, _v)
+		LITERAL_TYPE(Mesi::Farads, _f)
+		LITERAL_TYPE(Mesi::Ohms, _ohm)
+		LITERAL_TYPE(Mesi::Siemens, _siemens)
+		LITERAL_TYPE(Mesi::Webers, _wb)
+		LITERAL_TYPE(Mesi::Tesla, _t)
+		LITERAL_TYPE(Mesi::Henry, _h)
+#undef LITERAL_TYPE
 	}
-#pragma pop_macro("_N")
 }
