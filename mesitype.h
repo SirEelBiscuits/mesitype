@@ -156,15 +156,16 @@ namespace Mesi {
 		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
 		RationalTypeReduced<T, TYPE_B_PARAMS> const& right
 	) {
-
-		return RationalType<T,
-			t_m_n*t_m_d2 + t_m_n2*t_m_d, t_m_d*t_m_d2,
-			t_s_n*t_s_d2 + t_s_n2*t_s_d, t_s_d*t_s_d2,
-			t_kg_n*t_kg_d2 + t_kg_n2*t_kg_d, t_kg_d*t_kg_d2,
-			t_A_n*t_A_d2 + t_A_n2*t_A_d, t_A_d*t_A_d2,
-			t_K_n*t_K_d2 + t_K_n2*t_K_d, t_K_d*t_K_d2,
-			t_mol_n*t_mol_d2 + t_mol_n2*t_mol_d, t_mol_d*t_mol_d2,
-			t_cd_n*t_cd_d2 + t_cd_n2*t_cd_d, t_cd_d*t_cd_d2>(left.val * right.val);
+#define ADD_FRAC(TP) using TP = std::ratio_add<std::ratio<t_##TP##_n, t_##TP##_d>, std::ratio<t_##TP##_n2, t_##TP##_d2>>
+		ADD_FRAC(m);
+		ADD_FRAC(kg);
+		ADD_FRAC(s);
+		ADD_FRAC(A);
+		ADD_FRAC(K);
+		ADD_FRAC(mol);
+		ADD_FRAC(cd);
+		return RationalType<T, m::num, m::den, s::num, s::den, kg::num, kg::den, A::num, A::den, K::num, K::den, mol::num, mol::den, cd::num, cd::den>(left.val * right.val);
+#undef ADD_FRAC
 	}
 
 	template<typename T, TYPE_A_FULL_PARAMS, TYPE_B_FULL_PARAMS>
@@ -172,66 +173,68 @@ namespace Mesi {
 		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
 		RationalTypeReduced<T, TYPE_B_PARAMS> const& right
 	) {
-		return RationalType<T,
-			t_m_n*t_m_d2 - t_m_n2*t_m_d, t_m_d*t_m_d2,
-			t_s_n*t_s_d2 - t_s_n2*t_s_d, t_s_d*t_s_d2,
-			t_kg_n*t_kg_d2 - t_kg_n2*t_kg_d, t_kg_d*t_kg_d2,
-			t_A_n*t_A_d2 - t_A_n2*t_A_d, t_A_d*t_A_d2,
-			t_K_n*t_K_d2 - t_K_n2*t_K_d, t_K_d*t_K_d2,
-			t_mol_n*t_mol_d2 - t_mol_n2*t_mol_d, t_mol_d*t_mol_d2,
-			t_cd_n*t_cd_d2 - t_cd_n2*t_cd_d, t_cd_d*t_cd_d2>(left.val / right.val);
+#define SUB_FRAC(TP) using TP = std::ratio_subtract<std::ratio<t_##TP##_n, t_##TP##_d>, std::ratio<t_##TP##_n2, t_##TP##_d2>>
+		SUB_FRAC(m);
+		SUB_FRAC(kg);
+		SUB_FRAC(s);
+		SUB_FRAC(A);
+		SUB_FRAC(K);
+		SUB_FRAC(mol);
+		SUB_FRAC(cd);
+		return RationalType<T, m::num, m::den, s::num, s::den, kg::num, kg::den, A::num, A::den, K::num, K::den, mol::num, mol::den, cd::num, cd::den>(left.val / right.val);
+#undef SUB_FRAC
 	}
 
 	/*
 	 * Unary operators, to help with literals (and general usage!)
 	 */
 
-	template<TYPE_A_FULL_PARAMS>
+	template<typename T, TYPE_A_FULL_PARAMS>
 	constexpr auto operator-(
-		RationalTypeReduced<TYPE_A_PARAMS> const& op
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& op
 	) {
-		return RationalTypeReduced<TYPE_A_PARAMS>(-op.val);
+		return RationalTypeReduced<T, TYPE_A_PARAMS>(-op.val);
 	}
 
-	template<TYPE_A_FULL_PARAMS>
+	template<typename T, TYPE_A_FULL_PARAMS>
 	constexpr auto operator+(
-			RationalTypeReduced<TYPE_A_PARAMS> const& op
+			RationalTypeReduced<T, TYPE_A_PARAMS> const& op
 	) {
-		return RationalTypeReduced<TYPE_A_PARAMS>(op);
+		return RationalTypeReduced<T, TYPE_A_PARAMS>(op);
 	}
 
 	/*
 	 * Scalers by non-SI values (allows things like 2 * 3._m
 	 */
 
-	template<TYPE_A_FULL_PARAMS, typename S>
+	template<typename T, TYPE_A_FULL_PARAMS, typename S>
 	constexpr auto operator*(
-		RationalTypeReduced<TYPE_A_PARAMS> const& left,
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
 		S const& right
 	) {
-		return RationalTypeReduced<TYPE_A_PARAMS>(left.val * right);
+		return RationalTypeReduced<T, TYPE_A_PARAMS>(left.val * right);
 	}
 
-	template<TYPE_A_FULL_PARAMS, typename S>
+	template<typename T, TYPE_A_FULL_PARAMS, typename S>
 	constexpr auto operator*(
 		S const & left,
-		RationalTypeReduced<TYPE_A_PARAMS> const& right
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& right
 	) {
 		return right * left;
 	}
 
-	template<TYPE_A_FULL_PARAMS, typename S>
+	template<typename T, TYPE_A_FULL_PARAMS, typename S>
 	constexpr auto operator/(
-		RationalTypeReduced<TYPE_A_PARAMS> const& left,
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
 		S const& right
 	) {
-		return RationalTypeReduced<TYPE_A_PARAMS>(left.val / right);
+		return RationalTypeReduced<T, TYPE_A_PARAMS>(left.val / right);
 	}
 
-	template<TYPE_A_FULL_PARAMS, typename S>
+	template<typename T, TYPE_A_FULL_PARAMS, typename S>
 	constexpr auto operator/(
 		S const & left,
-		RationalTypeReduced<TYPE_A_PARAMS> const& right
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& right
 	) {
 		return RationalTypeReduced<T, -t_m_n, t_m_d, -t_s_n, t_s_d, -t_kg_n, t_kg_d, -t_A_n, t_A_d, -t_K_n, t_K_d, -t_mol_n, t_mol_d, -t_cd_n, t_cd_d>( left / right.val );
 	}
@@ -239,50 +242,50 @@ namespace Mesi {
 	/*
 	 * Comparison operators
 	 */
-	template<TYPE_A_FULL_PARAMS>
+	template<typename T, TYPE_A_FULL_PARAMS>
 	constexpr bool operator==(
-		RationalTypeReduced<TYPE_A_PARAMS> const& left,
-		RationalTypeReduced<TYPE_A_PARAMS> const& right
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& right
 	) {
 		return left.val == right.val;
 	}
 
-	template<TYPE_A_FULL_PARAMS>
+	template<typename T, TYPE_A_FULL_PARAMS>
 	constexpr bool operator<(
-		RationalTypeReduced<TYPE_A_PARAMS> const& left,
-		RationalTypeReduced<TYPE_A_PARAMS> const& right
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& right
 	) {
 		return left.val < right.val;
 	}
 
-	template<TYPE_A_FULL_PARAMS>
+	template<typename T, TYPE_A_FULL_PARAMS>
 	constexpr bool operator!=(
-		RationalTypeReduced<TYPE_A_PARAMS> const& left,
-		RationalTypeReduced<TYPE_A_PARAMS> const& right
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& right
 	) {
 		return !(right == left);
 	}
 
-	template<TYPE_A_FULL_PARAMS>
+	template<typename T, TYPE_A_FULL_PARAMS>
 	constexpr bool operator<=(
-		RationalTypeReduced<TYPE_A_PARAMS> const& left,
-		RationalTypeReduced<TYPE_A_PARAMS> const& right
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& right
 	) {
 		return left < right || left == right;
 	}
 
-	template<TYPE_A_FULL_PARAMS>
+	template<typename T, TYPE_A_FULL_PARAMS>
 	constexpr bool operator>(
-		RationalTypeReduced<TYPE_A_PARAMS> const& left,
-		RationalTypeReduced<TYPE_A_PARAMS> const& right
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& right
 	) {
 		return right < left;
 	}
 
-	template<TYPE_A_FULL_PARAMS>
+	template<typename T, TYPE_A_FULL_PARAMS>
 	constexpr bool operator>=(
-		RationalTypeReduced<TYPE_A_PARAMS> const& left,
-		RationalTypeReduced<TYPE_A_PARAMS> const& right
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& right
 	) {
 		return left > right || left == right;
 	}
