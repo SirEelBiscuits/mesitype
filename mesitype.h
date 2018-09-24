@@ -4,6 +4,9 @@
 #include <ratio>
 
 namespace Mesi {
+/* Utility macro for applying another macro to all known units, for internal use only */
+#define ALL_UNITS(op) op(m) op(s) op(kg) op(A) op(K) op(mol) op(cd)
+
 	/**
 	 * @brief Main class to store SI types
 	 *
@@ -76,15 +79,7 @@ namespace Mesi {
 				return s_unitString;
 
 #define DIM_TO_STRING(TP) if( t_##TP##_n == 1 && t_##TP##_d == 1 ) s_unitString += std::string(#TP) + " "; else if( t_##TP##_n != 0 && t_##TP##_d == 1) s_unitString += std::string(#TP) + "^" + std::to_string(static_cast<long long>(t_##TP##_n)) + " "; else s_unitString += std::string(#TP) + "^(" + std::to_string(static_cast<long long>(t_##TP##_n)) + "/" + std::to_string(static_cast<long long>(t_##TP##_d)) + ") ";
-
-			DIM_TO_STRING(m);
-			DIM_TO_STRING(s);
-			DIM_TO_STRING(kg);
-			DIM_TO_STRING(A);
-			DIM_TO_STRING(K);
-			DIM_TO_STRING(mol);
-			DIM_TO_STRING(cd);
-
+			ALL_UNITS(DIM_TO_STRING)
 #undef DIM_TO_STRING
 			
 			s_unitString = s_unitString.substr(0, s_unitString.size() - 1);
@@ -137,7 +132,6 @@ namespace Mesi {
 		std::ratio<t_mol_n, t_mol_d>::num, std::ratio<t_mol_n, t_mol_d>::den,
 		std::ratio<t_cd_n, t_cd_d>::num, std::ratio<t_cd_n, t_cd_d>::den>;
 
-#define ALL_UNITS(op) op(m) op(s) op(kg) op(A) op(K) op(mol) op(cd)
 #define TYPE_A_FULL_PARAMS intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d
 #define TYPE_A_PARAMS t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d
 #define TYPE_B_FULL_PARAMS intmax_t t_m_n2, intmax_t t_m_d2, intmax_t t_s_n2, intmax_t t_s_d2, intmax_t t_kg_n2, intmax_t t_kg_d2, intmax_t t_A_n2, intmax_t t_A_d2, intmax_t t_K_n2, intmax_t t_K_d2, intmax_t t_mol_n2, intmax_t t_mol_d2, intmax_t t_cd_n2, intmax_t t_cd_d2
@@ -179,8 +173,8 @@ namespace Mesi {
 	) {
 #define SUB_FRAC(TP) using TP = std::ratio_subtract<std::ratio<t_##TP##_n, t_##TP##_d>, std::ratio<t_##TP##_n2, t_##TP##_d2>>;
 		ALL_UNITS(SUB_FRAC)
+	#undef SUB_FRAC
 		return RationalType<T, m::num, m::den, s::num, s::den, kg::num, kg::den, A::num, A::den, K::num, K::den, mol::num, mol::den, cd::num, cd::den>(left.val / right.val);
-#undef SUB_FRAC
 	}
 
 	/*
@@ -292,6 +286,7 @@ namespace Mesi {
 #undef TYPE_A_PARAMS
 #undef TYPE_B_FULL_PARAMS
 #undef TYPE_B_PARAMS
+#undef ALL_UNITS
 
 	/*
 	 * Readable names for common types
@@ -336,7 +331,7 @@ namespace Mesi {
 	 * Note that this defaults to the type set below, if no other is set
 	 * before calling!
 	 *
-	 * These are all lowercase, as user-defined literals beginning with
+	 * These are all lowercase, as identifiers beginning with
 	 * _[A-Z] are reserved.
 	 */
 #define LITERAL_TYPE(T, SUFFIX) \
