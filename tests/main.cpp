@@ -307,8 +307,8 @@ Tee_Test(test_literal_overloads) {
 	assert(Mesi::SecondsSq(1) == 1_s2);
 	assert(Mesi::Kilos(1) == 1_kg);
 	assert(Mesi::KilosSq(1) == 1_kg2);
-	assert(Mesi::Newtons(1) == 1_N);
-	assert(Mesi::NewtonsSq(1) == 1_N2);
+	assert(Mesi::Newtons(1) == 1_n);
+	assert(Mesi::NewtonsSq(1) == 1_n2);
 }
 
 int main() {
