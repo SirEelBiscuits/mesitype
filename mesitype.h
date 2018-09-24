@@ -128,31 +128,33 @@ namespace Mesi {
 		std::ratio<t_mol_n, t_mol_d>::num, std::ratio<t_mol_n, t_mol_d>::den,
 		std::ratio<t_cd_n, t_cd_d>::num, std::ratio<t_cd_n, t_cd_d>::den>;
 
+#define TYPE_A_FULL_PARAMS intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d
+#define TYPE_A_PARAMS t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d
+#define TYPE_B_FULL_PARAMS intmax_t t_m_n2, intmax_t t_m_d2, intmax_t t_s_n2, intmax_t t_s_d2, intmax_t t_kg_n2, intmax_t t_kg_d2, intmax_t t_A_n2, intmax_t t_A_d2, intmax_t t_K_n2, intmax_t t_K_d2, intmax_t t_mol_n2, intmax_t t_mol_d2, intmax_t t_cd_n2, intmax_t t_cd_d2
+#define TYPE_B_PARAMS t_m_n2, t_m_d2, t_s_n2, t_s_d2, t_kg_n2, t_kg_d2, t_A_n2, t_A_d2, t_K_n2, t_K_d2, t_mol_n2, t_mol_d2, t_cd_n2, t_cd_d2
 	/*
 	 * Arithmatic operators for combining SI values.
 	 */
-	template<typename T, intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d>
+	template<typename T, TYPE_A_FULL_PARAMS>
 	constexpr auto operator+(
-		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& left,
-		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& right
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& right
 	) {
-		return RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d>(left.val + right.val);
+		return RationalTypeReduced<T, TYPE_A_PARAMS>(left.val + right.val);
 	}
 
-	template<typename T, intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d>
+	template<typename T, TYPE_A_FULL_PARAMS>
 	constexpr auto operator-(
-		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& left,
-		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& right
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& right
 	) {
-		return RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d>(left.val - right.val);
+		return RationalTypeReduced<T, TYPE_A_PARAMS>(left.val - right.val);
 	}
 
-	template<typename T,
-		 intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d,
-		 intmax_t t_m_n2, intmax_t t_m_d2, intmax_t t_s_n2, intmax_t t_s_d2, intmax_t t_kg_n2, intmax_t t_kg_d2, intmax_t t_A_n2, intmax_t t_A_d2, intmax_t t_K_n2, intmax_t t_K_d2, intmax_t t_mol_n2, intmax_t t_mol_d2, intmax_t t_cd_n2, intmax_t t_cd_d2>
+	template<typename T, TYPE_A_FULL_PARAMS, TYPE_B_FULL_PARAMS>
 	constexpr auto operator*(
-		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& left,
-		RationalTypeReduced<T, t_m_n2, t_m_d2, t_s_n2, t_s_d2, t_kg_n2, t_kg_d2, t_A_n2, t_A_d2, t_K_n2, t_K_d2, t_mol_n2, t_mol_d2, t_cd_n2, t_cd_d2> const& right
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
+		RationalTypeReduced<T, TYPE_B_PARAMS> const& right
 	) {
 		return RationalType<T,
 		    t_m_n*t_m_d2 + t_m_n2*t_m_d, t_m_d*t_m_d2,
@@ -164,12 +166,10 @@ namespace Mesi {
 		    t_cd_n*t_cd_d2 + t_cd_n2*t_cd_d, t_cd_d*t_cd_d2>(left.val * right.val);
 	}
 
-	template<typename T,
-		 intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d,
-		 intmax_t t_m_n2, intmax_t t_m_d2, intmax_t t_s_n2, intmax_t t_s_d2, intmax_t t_kg_n2, intmax_t t_kg_d2, intmax_t t_A_n2, intmax_t t_A_d2, intmax_t t_K_n2, intmax_t t_K_d2, intmax_t t_mol_n2, intmax_t t_mol_d2, intmax_t t_cd_n2, intmax_t t_cd_d2>
+	template<typename T, TYPE_A_FULL_PARAMS, TYPE_B_FULL_PARAMS>
 	constexpr auto operator/(
-		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& left,
-		RationalTypeReduced<T, t_m_n2, t_m_d2, t_s_n2, t_s_d2, t_kg_n2, t_kg_d2, t_A_n2, t_A_d2, t_K_n2, t_K_d2, t_mol_n2, t_mol_d2, t_cd_n2, t_cd_d2> const& right
+		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
+		RationalTypeReduced<T, TYPE_B_PARAMS> const& right
 	) {
 		return RationalType<T,
 		    t_m_n*t_m_d2 - t_m_n2*t_m_d, t_m_d*t_m_d2,
@@ -185,52 +185,52 @@ namespace Mesi {
 	 * Unary operators, to help with literals (and general usage!)
 	 */
 
-	template<typename T, intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d>
+	template<TYPE_A_FULL_PARAMS>
 	constexpr auto operator-(
-		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& op
+		RationalTypeReduced<TYPE_A_PARAMS> const& op
 	) {
-		return RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d>(-op.val);
+		return RationalTypeReduced<TYPE_A_PARAMS>(-op.val);
 	}
 
-	template<typename T, intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d>
+	template<TYPE_A_FULL_PARAMS>
 	constexpr auto operator+(
-			RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& op
+			RationalTypeReduced<TYPE_A_PARAMS> const& op
 	) {
-		return RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d>(op);
+		return RationalTypeReduced<TYPE_A_PARAMS>(op);
 	}
 
 	/*
 	 * Scalers by non-SI values (allows things like 2 * 3._m
 	 */
 
-	template<typename T, intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d, typename S>
+	template<TYPE_A_FULL_PARAMS, typename S>
 	constexpr auto operator*(
-		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& left,
+		RationalTypeReduced<TYPE_A_PARAMS> const& left,
 		S const& right
 	) {
-		return RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d>(left.val * right);
+		return RationalTypeReduced<TYPE_A_PARAMS>(left.val * right);
 	}
 
-	template<typename T, intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d, typename S>
+	template<TYPE_A_FULL_PARAMS, typename S>
 	constexpr auto operator*(
 		S const & left,
-		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& right
+		RationalTypeReduced<TYPE_A_PARAMS> const& right
 	) {
 		return right * left;
 	}
 
-	template<typename T, intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d, typename S>
+	template<TYPE_A_FULL_PARAMS, typename S>
 	constexpr auto operator/(
-		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& left,
+		RationalTypeReduced<TYPE_A_PARAMS> const& left,
 		S const& right
 	) {
-		return RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d>(left.val / right);
+		return RationalTypeReduced<TYPE_A_PARAMS>(left.val / right);
 	}
 
-	template<typename T, intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d, typename S>
+	template<TYPE_A_FULL_PARAMS, typename S>
 	constexpr auto operator/(
 		S const & left,
-		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& right
+		RationalTypeReduced<TYPE_A_PARAMS> const& right
 	) {
 		return RationalTypeReduced<T, -t_m_n, t_m_d, -t_s_n, t_s_d, -t_kg_n, t_kg_d, -t_A_n, t_A_d, -t_K_n, t_K_d, -t_mol_n, t_mol_d, -t_cd_n, t_cd_d>( left / right.val );
 	}
@@ -238,53 +238,58 @@ namespace Mesi {
 	/*
 	 * Comparison operators
 	 */
-	template<typename T, intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d>
+	template<TYPE_A_FULL_PARAMS>
 	constexpr bool operator==(
-		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& left,
-		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& right
+		RationalTypeReduced<TYPE_A_PARAMS> const& left,
+		RationalTypeReduced<TYPE_A_PARAMS> const& right
 	) {
 		return left.val == right.val;
 	}
 
-	template<typename T, intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d>
+	template<TYPE_A_FULL_PARAMS>
 	constexpr bool operator<(
-		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& left,
-		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& right
+		RationalTypeReduced<TYPE_A_PARAMS> const& left,
+		RationalTypeReduced<TYPE_A_PARAMS> const& right
 	) {
 		return left.val < right.val;
 	}
 
-	template<typename T, intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d>
+	template<TYPE_A_FULL_PARAMS>
 	constexpr bool operator!=(
-		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& left,
-		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& right
+		RationalTypeReduced<TYPE_A_PARAMS> const& left,
+		RationalTypeReduced<TYPE_A_PARAMS> const& right
 	) {
 		return !(right == left);
 	}
 
-	template<typename T, intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d>
+	template<TYPE_A_FULL_PARAMS>
 	constexpr bool operator<=(
-		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& left,
-		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& right
+		RationalTypeReduced<TYPE_A_PARAMS> const& left,
+		RationalTypeReduced<TYPE_A_PARAMS> const& right
 	) {
 		return left < right || left == right;
 	}
 
-	template<typename T, intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d>
+	template<TYPE_A_FULL_PARAMS>
 	constexpr bool operator>(
-		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& left,
-		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& right
+		RationalTypeReduced<TYPE_A_PARAMS> const& left,
+		RationalTypeReduced<TYPE_A_PARAMS> const& right
 	) {
 		return right < left;
 	}
 
-	template<typename T, intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d>
+	template<TYPE_A_FULL_PARAMS>
 	constexpr bool operator>=(
-		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& left,
-		RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d> const& right
+		RationalTypeReduced<TYPE_A_PARAMS> const& left,
+		RationalTypeReduced<TYPE_A_PARAMS> const& right
 	) {
 		return left > right || left == right;
 	}
+
+#undef TYPE_A_FULL_PARAMS
+#undef TYPE_A_PARAMS
+#undef TYPE_B_FULL_PARAMS
+#undef TYPE_B_PARAMS
 
 	/*
 	 * Readable names for common types
