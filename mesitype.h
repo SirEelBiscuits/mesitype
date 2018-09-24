@@ -312,6 +312,7 @@ namespace Mesi {
 	using Newtons   = decltype(Meters{} * Kilos{} / Seconds{} / Seconds{});
 	using NewtonsSq = decltype(Newtons{} * Newtons{});
 	using MetersSq  = decltype(Meters{} * Meters{});
+	using MetersCu  = decltype(Meters{} * MetersSq{});
 	using SecondsSq = decltype(Seconds{} * Seconds{});
 	using KilosSq   = decltype(Kilos{} * Kilos{});
 	using Hertz     = decltype(Scalar{} / Seconds{});
@@ -342,6 +343,7 @@ namespace Mesi {
 
 		LITERAL_TYPE(Mesi::Meters, _m)
 		LITERAL_TYPE(Mesi::MetersSq, _m2)
+		LITERAL_TYPE(Mesi::MetersCu, _m3)
 		LITERAL_TYPE(Mesi::Seconds, _s)
 		LITERAL_TYPE(Mesi::SecondsSq, _s2)
 		LITERAL_TYPE(Mesi::Kilos, _kg)
