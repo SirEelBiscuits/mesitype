@@ -45,13 +45,13 @@ namespace Mesi {
 		using BaseType = T;
 		using ScalarType = RationalTypeReduced<T, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1>;
 
-		static_assert(std::ratio<t_m_n, t_m_d>::num == t_m_n);
-		static_assert(std::ratio<t_s_n, t_s_d>::num == t_s_n);
-		static_assert(std::ratio<t_kg_n, t_kg_d>::num == t_kg_n);
-		static_assert(std::ratio<t_A_n, t_A_d>::num == t_A_n);
-		static_assert(std::ratio<t_K_n, t_K_d>::num == t_K_n);
-		static_assert(std::ratio<t_mol_n, t_mol_d>::num == t_mol_n);
-		static_assert(std::ratio<t_cd_n, t_cd_d>::num == t_cd_n);
+		static_assert(std::ratio<t_m_n, t_m_d>::num == t_m_n, "The meter exponent fraction is not irreducible");
+		static_assert(std::ratio<t_s_n, t_s_d>::num == t_s_n, "The second exponent fraction is not irreducible");
+		static_assert(std::ratio<t_kg_n, t_kg_d>::num == t_kg_n, "The kilogram exponent fraction is not irreducible");
+		static_assert(std::ratio<t_A_n, t_A_d>::num == t_A_n, "The ampere exponent fraction is not irreducible");
+		static_assert(std::ratio<t_K_n, t_K_d>::num == t_K_n, "The Kelvin exponent fraction is not irreducible");
+		static_assert(std::ratio<t_mol_n, t_mol_d>::num == t_mol_n, "The mole exponent fraction is not irreducible");
+		static_assert(std::ratio<t_cd_n, t_cd_d>::num == t_cd_n, "The candela exponent fraction is not irreducible");
 
 		T val;
 
