@@ -137,6 +137,7 @@ namespace Mesi {
 		std::ratio<t_mol_n, t_mol_d>::num, std::ratio<t_mol_n, t_mol_d>::den,
 		std::ratio<t_cd_n, t_cd_d>::num, std::ratio<t_cd_n, t_cd_d>::den>;
 
+#define ALL_UNITS(op) op(m) op(s) op(kg) op(A) op(K) op(mol) op(cd)
 #define TYPE_A_FULL_PARAMS intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d
 #define TYPE_A_PARAMS t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d
 #define TYPE_B_FULL_PARAMS intmax_t t_m_n2, intmax_t t_m_d2, intmax_t t_s_n2, intmax_t t_s_d2, intmax_t t_kg_n2, intmax_t t_kg_d2, intmax_t t_A_n2, intmax_t t_A_d2, intmax_t t_K_n2, intmax_t t_K_d2, intmax_t t_mol_n2, intmax_t t_mol_d2, intmax_t t_cd_n2, intmax_t t_cd_d2
@@ -165,16 +166,10 @@ namespace Mesi {
 		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
 		RationalTypeReduced<T, TYPE_B_PARAMS> const& right
 	) {
-#define ADD_FRAC(TP) using TP = std::ratio_add<std::ratio<t_##TP##_n, t_##TP##_d>, std::ratio<t_##TP##_n2, t_##TP##_d2>>
-		ADD_FRAC(m);
-		ADD_FRAC(kg);
-		ADD_FRAC(s);
-		ADD_FRAC(A);
-		ADD_FRAC(K);
-		ADD_FRAC(mol);
-		ADD_FRAC(cd);
-		return RationalType<T, m::num, m::den, s::num, s::den, kg::num, kg::den, A::num, A::den, K::num, K::den, mol::num, mol::den, cd::num, cd::den>(left.val * right.val);
+#define ADD_FRAC(TP) using TP = std::ratio_add<std::ratio<t_##TP##_n, t_##TP##_d>, std::ratio<t_##TP##_n2, t_##TP##_d2>>;
+		ALL_UNITS(ADD_FRAC)
 #undef ADD_FRAC
+		return RationalType<T, m::num, m::den, s::num, s::den, kg::num, kg::den, A::num, A::den, K::num, K::den, mol::num, mol::den, cd::num, cd::den>(left.val * right.val);
 	}
 
 	template<typename T, TYPE_A_FULL_PARAMS, TYPE_B_FULL_PARAMS>
@@ -182,14 +177,8 @@ namespace Mesi {
 		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
 		RationalTypeReduced<T, TYPE_B_PARAMS> const& right
 	) {
-#define SUB_FRAC(TP) using TP = std::ratio_subtract<std::ratio<t_##TP##_n, t_##TP##_d>, std::ratio<t_##TP##_n2, t_##TP##_d2>>
-		SUB_FRAC(m);
-		SUB_FRAC(kg);
-		SUB_FRAC(s);
-		SUB_FRAC(A);
-		SUB_FRAC(K);
-		SUB_FRAC(mol);
-		SUB_FRAC(cd);
+#define SUB_FRAC(TP) using TP = std::ratio_subtract<std::ratio<t_##TP##_n, t_##TP##_d>, std::ratio<t_##TP##_n2, t_##TP##_d2>>;
+		ALL_UNITS(SUB_FRAC)
 		return RationalType<T, m::num, m::den, s::num, s::den, kg::num, kg::den, A::num, A::den, K::num, K::den, mol::num, mol::den, cd::num, cd::den>(left.val / right.val);
 #undef SUB_FRAC
 	}
@@ -317,29 +306,29 @@ namespace Mesi {
 
 	using Scalar    = Type<MESI_LITERAL_TYPE, 0, 0, 0>;
 	using Meters    = Type<MESI_LITERAL_TYPE, 1, 0, 0>;
-	using MetersSq  = Type<MESI_LITERAL_TYPE, 2, 0, 0>;
 	using Seconds   = Type<MESI_LITERAL_TYPE, 0, 1, 0>;
-	using SecondsSq = Type<MESI_LITERAL_TYPE, 0, 2, 0>;
 	using Kilos     = Type<MESI_LITERAL_TYPE, 0, 0, 1>;
-	using KilosSq   = Type<MESI_LITERAL_TYPE, 0, 0, 2>;
-	using Newtons   = Type<MESI_LITERAL_TYPE, 1, -2, 1>;
-	using NewtonsSq = Type<MESI_LITERAL_TYPE, 2, -4, 2>;
-	using Hertz     = Type<MESI_LITERAL_TYPE, 0, -1, 0>;
 	using Amperes   = Type<MESI_LITERAL_TYPE, 0, 0, 0, 1>;
 	using Kelvin    = Type<MESI_LITERAL_TYPE, 0, 0, 0, 0, 1>;
 	using Moles     = Type<MESI_LITERAL_TYPE, 0, 0, 0, 0, 0, 1>;
 	using Candela   = Type<MESI_LITERAL_TYPE, 0, 0, 0, 0, 0, 0, 1>;
-	using Pascals   = decltype(Newtons(1)/MetersSq(1));
-	using Joules    = decltype(Newtons(1)*Meters(1));
-	using Watts     = decltype(Joules(1)/Seconds(1));
-	using Coulombs  = decltype(Amperes(1)*Seconds(1));
-	using Volts     = decltype(Watts(1)/Amperes(1));
-	using Farads    = decltype(Coulombs(1)/Volts(1));
-	using Ohms      = decltype(Volts(1)/Amperes(1));
-	using Siemens   = decltype(Amperes(1)/Volts(1));
-	using Webers    = decltype(Volts(1)*Seconds(1));
-	using Tesla     = decltype(Webers(1)/MetersSq(1));
-	using Henry     = decltype(Webers(1)/Amperes(1));
+	using Newtons   = decltype(Meters{} * Kilos{} / Seconds{} / Seconds{});
+	using NewtonsSq = decltype(Newtons{} * Newtons{});
+	using MetersSq  = decltype(Meters{} * Meters{});
+	using SecondsSq = decltype(Seconds{} * Seconds{});
+	using KilosSq   = decltype(Kilos{} * Kilos{});
+	using Hertz     = decltype(Scalar{} / Seconds{});
+	using Pascals   = decltype(Newtons{} / MetersSq{});
+	using Joules    = decltype(Newtons{} * Meters{});
+	using Watts     = decltype(Joules{} / Seconds{});
+	using Coulombs  = decltype(Amperes{} * Seconds{});
+	using Volts     = decltype(Watts{} / Amperes{});
+	using Farads    = decltype(Coulombs{} / Volts{});
+	using Ohms      = decltype(Volts{} / Amperes{});
+	using Siemens   = decltype(Amperes{} / Volts{});
+	using Webers    = decltype(Volts{} * Seconds{});
+	using Tesla     = decltype(Webers{} / MetersSq{});
+	using Henry     = decltype(Webers{} / Amperes{});
 
 	namespace Literals {
 	/*
