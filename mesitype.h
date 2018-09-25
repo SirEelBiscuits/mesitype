@@ -18,6 +18,7 @@ namespace Mesi {
 	 * @param t_K_* similar to t_m, but Kelvin
 	 * @param t_mol_* similar to t_m, but moles
 	 * @param t_cd_* similar to t_m, but candela
+	 * @param t_pref_* defines a rational prefix, i.e. 1,1000 for 1/1000 == milli-
 	 *
 	 * This class is to enforce compile-time checking, and where possible,
 	 * compile-time calculation of SI values using constexpr.
@@ -39,11 +40,12 @@ namespace Mesi {
 		intmax_t t_A_n, intmax_t t_A_d,
 		intmax_t t_K_n, intmax_t t_K_d,
 		intmax_t t_mol_n, intmax_t t_mol_d,
-		intmax_t t_cd_n, intmax_t t_cd_d>
+		intmax_t t_cd_n, intmax_t t_cd_d,
+		intmax_t t_pref>
 	struct RationalTypeReduced
 	{
 		using BaseType = T;
-		using ScalarType = RationalTypeReduced<T, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1>;
+		using ScalarType = RationalTypeReduced<T, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, t_pref>;
 
 		static_assert(std::ratio<t_m_n, t_m_d>::num == t_m_n, "The meter exponent fraction is not irreducible");
 		static_assert(std::ratio<t_s_n, t_s_d>::num == t_s_n, "The second exponent fraction is not irreducible");
@@ -69,6 +71,23 @@ namespace Mesi {
 		explicit operator T() const {
 			return val;
 		}
+		
+		template<intmax_t pref2>
+		explicit constexpr operator RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d, pref2>() const {
+			T nv = val;
+			intmax_t pref_diff = t_pref - pref2;
+			while(pref_diff > 0)
+			{
+				nv *= 10;
+				pref_diff--;
+			}
+			while(pref_diff < 0)
+			{
+				nv /= 10;
+				pref_diff++;
+			}
+			return RationalTypeReduced<T, t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d, pref2>(nv);
+		}
 
 		/**
 		 * getUnit will get a SI-style unit string for this class
@@ -77,6 +96,11 @@ namespace Mesi {
 			static std::string s_unitString("");
 			if( s_unitString.size() > 0 )
 				return s_unitString;
+
+			if( t_pref != 0 )
+			{
+				s_unitString += " * 10^" + std::to_string(static_cast<long long>(t_pref)) + " ";
+			}
 
 #define DIM_TO_STRING(TP) if( t_##TP##_n == 1 && t_##TP##_d == 1 ) s_unitString += std::string(#TP) + " "; else if( t_##TP##_n != 0 && t_##TP##_d == 1) s_unitString += std::string(#TP) + "^" + std::to_string(static_cast<long long>(t_##TP##_n)) + " "; else if(t_##TP##_n != 0) s_unitString += std::string(#TP) + "^(" + std::to_string(static_cast<long long>(t_##TP##_n)) + "/" + std::to_string(static_cast<long long>(t_##TP##_d)) + ") ";
 			ALL_UNITS(DIM_TO_STRING)
@@ -122,7 +146,8 @@ namespace Mesi {
 		intmax_t t_A_n, intmax_t t_A_d,
 		intmax_t t_K_n, intmax_t t_K_d,
 		intmax_t t_mol_n, intmax_t t_mol_d,
-		intmax_t t_cd_n, intmax_t t_cd_d>
+		intmax_t t_cd_n, intmax_t t_cd_d,
+		intmax_t t_pref = 0> 
 	using RationalType = RationalTypeReduced<T,
 		std::ratio<t_m_n, t_m_d>::num, std::ratio<t_m_n, t_m_d>::den,
 		std::ratio<t_s_n, t_s_d>::num, std::ratio<t_s_n, t_s_d>::den,
@@ -130,12 +155,13 @@ namespace Mesi {
 		std::ratio<t_A_n, t_A_d>::num, std::ratio<t_A_n, t_A_d>::den,
 		std::ratio<t_K_n, t_K_d>::num, std::ratio<t_K_n, t_K_d>::den,
 		std::ratio<t_mol_n, t_mol_d>::num, std::ratio<t_mol_n, t_mol_d>::den,
-		std::ratio<t_cd_n, t_cd_d>::num, std::ratio<t_cd_n, t_cd_d>::den>;
+		std::ratio<t_cd_n, t_cd_d>::num, std::ratio<t_cd_n, t_cd_d>::den,
+		t_pref>;
 
-#define TYPE_A_FULL_PARAMS intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d
-#define TYPE_A_PARAMS t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d
-#define TYPE_B_FULL_PARAMS intmax_t t_m_n2, intmax_t t_m_d2, intmax_t t_s_n2, intmax_t t_s_d2, intmax_t t_kg_n2, intmax_t t_kg_d2, intmax_t t_A_n2, intmax_t t_A_d2, intmax_t t_K_n2, intmax_t t_K_d2, intmax_t t_mol_n2, intmax_t t_mol_d2, intmax_t t_cd_n2, intmax_t t_cd_d2
-#define TYPE_B_PARAMS t_m_n2, t_m_d2, t_s_n2, t_s_d2, t_kg_n2, t_kg_d2, t_A_n2, t_A_d2, t_K_n2, t_K_d2, t_mol_n2, t_mol_d2, t_cd_n2, t_cd_d2
+#define TYPE_A_FULL_PARAMS intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d, intmax_t t_pref
+#define TYPE_A_PARAMS t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d, t_pref
+#define TYPE_B_FULL_PARAMS intmax_t t_m_n2, intmax_t t_m_d2, intmax_t t_s_n2, intmax_t t_s_d2, intmax_t t_kg_n2, intmax_t t_kg_d2, intmax_t t_A_n2, intmax_t t_A_d2, intmax_t t_K_n2, intmax_t t_K_d2, intmax_t t_mol_n2, intmax_t t_mol_d2, intmax_t t_cd_n2, intmax_t t_cd_d2, intmax_t t_pref2
+#define TYPE_B_PARAMS t_m_n2, t_m_d2, t_s_n2, t_s_d2, t_kg_n2, t_kg_d2, t_A_n2, t_A_d2, t_K_n2, t_K_d2, t_mol_n2, t_mol_d2, t_cd_n2, t_cd_d2, t_pref2
 	/*
 	 * Arithmatic operators for combining SI values.
 	 */
@@ -163,7 +189,7 @@ namespace Mesi {
 #define ADD_FRAC(TP) using TP = std::ratio_add<std::ratio<t_##TP##_n, t_##TP##_d>, std::ratio<t_##TP##_n2, t_##TP##_d2>>;
 		ALL_UNITS(ADD_FRAC)
 #undef ADD_FRAC
-		return RationalType<T, m::num, m::den, s::num, s::den, kg::num, kg::den, A::num, A::den, K::num, K::den, mol::num, mol::den, cd::num, cd::den>(left.val * right.val);
+		return RationalType<T, m::num, m::den, s::num, s::den, kg::num, kg::den, A::num, A::den, K::num, K::den, mol::num, mol::den, cd::num, cd::den, t_pref + t_pref2>(left.val * right.val);
 	}
 
 	template<typename T, TYPE_A_FULL_PARAMS, TYPE_B_FULL_PARAMS>
@@ -174,7 +200,7 @@ namespace Mesi {
 #define SUB_FRAC(TP) using TP = std::ratio_subtract<std::ratio<t_##TP##_n, t_##TP##_d>, std::ratio<t_##TP##_n2, t_##TP##_d2>>;
 		ALL_UNITS(SUB_FRAC)
 	#undef SUB_FRAC
-		return RationalType<T, m::num, m::den, s::num, s::den, kg::num, kg::den, A::num, A::den, K::num, K::den, mol::num, mol::den, cd::num, cd::den>(left.val / right.val);
+		return RationalType<T, m::num, m::den, s::num, s::den, kg::num, kg::den, A::num, A::den, K::num, K::den, mol::num, mol::den, cd::num, cd::den, t_pref - t_pref2>(left.val / right.val);
 	}
 
 	/*
@@ -294,8 +320,8 @@ namespace Mesi {
 	 * Readable names for common types
 	 */
 
-	template<typename T, intmax_t t_m, intmax_t t_s, intmax_t t_kg, intmax_t t_A=0, intmax_t t_K=0, intmax_t t_mol=0, intmax_t t_cd=0>
-	using Type = RationalType<T, t_m, 1, t_s, 1, t_kg, 1, t_A, 1, t_K, 1, t_mol, 1, t_cd, 1>;
+	template<typename T, intmax_t t_m, intmax_t t_s, intmax_t t_kg, intmax_t t_A=0, intmax_t t_K=0, intmax_t t_mol=0, intmax_t t_cd=0, intmax_t t_pref = 0>
+	using Type = RationalType<T, t_m, 1, t_s, 1, t_kg, 1, t_A, 1, t_K, 1, t_mol, 1, t_cd, 1, t_pref>;
 
 #ifndef MESI_LITERAL_TYPE
 #	define MESI_LITERAL_TYPE float
@@ -304,17 +330,17 @@ namespace Mesi {
 	using Scalar    = Type<MESI_LITERAL_TYPE, 0, 0, 0>;
 	using Meters    = Type<MESI_LITERAL_TYPE, 1, 0, 0>;
 	using Seconds   = Type<MESI_LITERAL_TYPE, 0, 1, 0>;
-	using Kilos     = Type<MESI_LITERAL_TYPE, 0, 0, 1>;
+	using Kilograms = Type<MESI_LITERAL_TYPE, 0, 0, 1>;
 	using Amperes   = Type<MESI_LITERAL_TYPE, 0, 0, 0, 1>;
 	using Kelvin    = Type<MESI_LITERAL_TYPE, 0, 0, 0, 0, 1>;
 	using Moles     = Type<MESI_LITERAL_TYPE, 0, 0, 0, 0, 0, 1>;
 	using Candela   = Type<MESI_LITERAL_TYPE, 0, 0, 0, 0, 0, 0, 1>;
-	using Newtons   = decltype(Meters{} * Kilos{} / Seconds{} / Seconds{});
+	using Newtons   = decltype(Meters{} * Kilograms{} / Seconds{} / Seconds{});
 	using NewtonsSq = decltype(Newtons{} * Newtons{});
 	using MetersSq  = decltype(Meters{} * Meters{});
 	using MetersCu  = decltype(Meters{} * MetersSq{});
 	using SecondsSq = decltype(Seconds{} * Seconds{});
-	using KilosSq   = decltype(Kilos{} * Kilos{});
+	using KilogramsSq = decltype(Kilograms{} * Kilograms{});
 	using Hertz     = decltype(Scalar{} / Seconds{});
 	using Pascals   = decltype(Newtons{} / MetersSq{});
 	using Joules    = decltype(Newtons{} * Meters{});
@@ -327,6 +353,22 @@ namespace Mesi {
 	using Webers    = decltype(Volts{} * Seconds{});
 	using Tesla     = decltype(Webers{} / MetersSq{});
 	using Henry     = decltype(Webers{} / Amperes{});
+	using Kilo      = Type<MESI_LITERAL_TYPE, 0, 0, 0, 0, 0, 0, 0, 3>;
+	using Mega      = decltype(Kilo{} * Kilo{});
+	using Giga      = decltype(Mega{} * Kilo{});
+	using Tera      = decltype(Giga{} * Kilo{});
+	using Peta      = decltype(Tera{} * Kilo{});
+	using Exa       = decltype(Peta{} * Kilo{});
+	using Zetta     = decltype(Exa{} * Kilo{});
+	using Yota      = decltype(Zetta{} * Kilo{});
+	using Milli     = decltype(Scalar{} / Kilo{});
+	using Micro     = decltype(Milli{} / Kilo{});
+	using Nano      = decltype(Micro{} / Kilo{});
+	using Pico      = decltype(Nano{} / Kilo{});
+	using Femto     = decltype(Pico{} / Kilo{});
+	using Atto      = decltype(Femto{} / Kilo{});
+	using Zepto     = decltype(Atto{} / Kilo{});
+	using Yocto     = decltype(Zepto{} / Kilo{});
 
 	namespace Literals {
 	/*
@@ -346,8 +388,8 @@ namespace Mesi {
 		LITERAL_TYPE(Mesi::MetersCu, _m3)
 		LITERAL_TYPE(Mesi::Seconds, _s)
 		LITERAL_TYPE(Mesi::SecondsSq, _s2)
-		LITERAL_TYPE(Mesi::Kilos, _kg)
-		LITERAL_TYPE(Mesi::KilosSq, _kg2)
+		LITERAL_TYPE(Mesi::Kilograms, _kg)
+		LITERAL_TYPE(Mesi::KilogramsSq, _kg2)
 		LITERAL_TYPE(Mesi::Newtons, _n)
 		LITERAL_TYPE(Mesi::NewtonsSq, _n2)
 		LITERAL_TYPE(Mesi::Hertz, _hz)

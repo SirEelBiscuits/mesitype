@@ -47,7 +47,7 @@ Tee_Test(test_basic_rules) {
 Tee_Test(test_scalar_rules) {
 	auto x = Mesi::Meters(3);
 	auto y = Mesi::Seconds(4);
-	auto z = Mesi::Kilos(5);
+	auto z = Mesi::Kilograms(5);
 
 	Tee_SubTest(test_scaling_multiplies) {
 		assert(static_cast<float>(2 * x) == 6);
@@ -84,7 +84,7 @@ Tee_Test(test_divisor_rules) {
 	auto w = Mesi::RationalType<float, 1, 2, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1>(2);
 	auto x = Mesi::Meters(3);
 	auto y = Mesi::Seconds(4);
-	auto z = Mesi::Kilos(5);
+	auto z = Mesi::Kilograms(5);
 
 	Tee_SubTest(test_dividing_scales_down) {
 		assert(static_cast<float>(w / 2) == 1.f);
@@ -150,8 +150,8 @@ Tee_Test(type_info_tests) {
 
 	Tee_SubTest(test_kilos_indicators_match_units) {
 		auto s = Mesi::Scalar(1);
-		auto kg = Mesi::Kilos(1);
-		auto kg2 = Mesi::KilosSq(1);
+		auto kg = Mesi::Kilograms(1);
+		auto kg2 = Mesi::KilogramsSq(1);
 		auto kg1_2 = Mesi::RationalType<float, 0, 1, 0, 1, 1, 2, 0, 1, 0, 1, 0, 1, 0, 1>(1);
 
 		auto kgUnit = std::regex(R"(kg |kg$)");
@@ -305,8 +305,8 @@ Tee_Test(test_literal_overloads) {
 	assert(Mesi::MetersSq(1) == 1_m2);
 	assert(Mesi::Seconds(1) == 1_s);
 	assert(Mesi::SecondsSq(1) == 1_s2);
-	assert(Mesi::Kilos(1) == 1_kg);
-	assert(Mesi::KilosSq(1) == 1_kg2);
+	assert(Mesi::Kilograms(1) == 1_kg);
+	assert(Mesi::KilogramsSq(1) == 1_kg2);
 	assert(Mesi::Newtons(1) == 1_n);
 	assert(Mesi::NewtonsSq(1) == 1_n2);
 }
