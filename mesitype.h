@@ -5,13 +5,20 @@
 
 namespace Mesi {
 	namespace _internal {
+		/* Utility template to factor out powers of 10 from a ratio,
+		 * e.g. 1/1000 -> 1/1 * 10^-3
+		 *
+		 * This lets us use larger SI prefixes like yocto, which would
+		 * be impossible with 64-bit integers, as those only go up to about
+		 * 10^19.
+		 */
 		template<typename t_ratio, intmax_t t_power>
 		struct RatioReduce
 		{
 			static constexpr intmax_t reduce_num(intmax_t num) { return (num % 10) != 0 ? num : reduce_num(num/10); }
-			static constexpr intmax_t reduce_pow(intmax_t num) { return (num % 10) != 0 ? 0 : (1 + reduce_pow(num/10)); }
+			static constexpr intmax_t factor_10(intmax_t num) { return (num % 10) != 0 ? 0 : (1 + factor_10(num/10)); }
 			using ratio = typename std::ratio<reduce_num(t_ratio::num), reduce_num(t_ratio::den)>;
-			static constexpr intmax_t power = t_power + reduce_pow(t_ratio::num) - reduce_pow(t_ratio::den);
+			static constexpr intmax_t power = t_power + factor_10(t_ratio::num) - factor_10(t_ratio::den);
 		};
 	}
 /* Utility macro for applying another macro to all known units, for internal use only */
