@@ -8,6 +8,12 @@ handling of units with orthogonal meanings.
 Ideally, the system will add zero overhead given a sufficiently smart compiler
 compared to using floats (or whatever else), but this has not been checked yet.
 
+Authors
+-------
+
+Jameson Thatcher
+Valentin Ochs
+
 Features
 --------
 MesiType allows for the combination of any of
@@ -18,7 +24,7 @@ MesiType allows for the combination of any of
 [Kelvin](http://en.wikipedia.org/wiki/Kelvin),
 [Moles](http://en.wikipedia.org/wiki/Mole_(Unit)), and
 [Candela](http://en.wikipedia.org/wiki/Candela),
-and any integral exponent thereof.
+and any rational exponent thereof.
 Operators return appropriate types for the operands, allowing you to, for
 example, divide a Meters type by a Seconds type and end up with Meters per
 Second.
@@ -86,7 +92,10 @@ These can be invoked as any of:
 * `_kg`
 * `_n`
 
-etc.
+etc. Some of the suffices should contain uppercase letters, but all names
+starting with `_` followed by a capital letter are res
+
+
 To make these available, do:
 
 ```cpp
