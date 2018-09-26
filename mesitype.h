@@ -160,7 +160,7 @@ namespace Mesi {
 		}
 
 		constexpr RationalTypeReduced& operator*=(T const& rhs) {
-			(*this) = (*this) * rhs;
+			return (*this) = (*this) * rhs;
 		}
 
 		constexpr RationalTypeReduced& operator/=(T const& rhs) {
