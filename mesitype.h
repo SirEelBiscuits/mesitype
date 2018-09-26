@@ -4,6 +4,23 @@
 #include <ratio>
 
 namespace Mesi {
+	namespace _internal {
+		/* Utility template to factor out powers of 10 from a ratio,
+		 * e.g. 1/1000 -> 1/1 * 10^-3
+		 *
+		 * This lets us use larger SI prefixes like yocto, which would
+		 * be impossible with 64-bit integers, as those only go up to about
+		 * 10^19.
+		 */
+		template<typename t_ratio, intmax_t t_power>
+		struct RatioReduce
+		{
+			static constexpr intmax_t reduce_num(intmax_t num) { return (num % 10) != 0 ? num : reduce_num(num/10); }
+			static constexpr intmax_t factor_10(intmax_t num) { return (num % 10) != 0 ? 0 : (1 + factor_10(num/10)); }
+			using ratio = typename std::ratio<reduce_num(t_ratio::num), reduce_num(t_ratio::den)>;
+			static constexpr intmax_t power = t_power + factor_10(t_ratio::num) - factor_10(t_ratio::den);
+		};
+	}
 /* Utility macro for applying another macro to all known units, for internal use only */
 #define ALL_UNITS(op) op(m) op(s) op(kg) op(A) op(K) op(mol) op(cd)
 
@@ -11,13 +28,16 @@ namespace Mesi {
 	 * @brief Main class to store SI types
 	 *
 	 * @param T storage type parameter
-	 * @param t_m_n, t_m_d number of dimensions of meters as a rational number, e.g., t_m_n/t_m_d == 2 => m^2
-	 * @param t_s_* similar to t_m, but seconds
-	 * @param t_kg_* similar to t_m, but kilograms
-	 * @param t_A_* similar to t_m, but amperes
-	 * @param t_K_* similar to t_m, but Kelvin
-	 * @param t_mol_* similar to t_m, but moles
-	 * @param t_cd_* similar to t_m, but candela
+	 * @param t_m number of dimensions of meters as a rational number, e.g., t_m == std::ratio<2,1> => m^2
+	 * @param t_s similar to t_m, but seconds
+	 * @param t_kg similar to t_m, but kilograms
+	 * @param t_A similar to t_m, but amperes
+	 * @param t_K similar to t_m, but Kelvin
+	 * @param t_mol similar to t_m, but moles
+	 * @param t_cd similar to t_m, but candela
+	 * @param t_ratio defines a scaling factor, i.e. 1,1000 for 1/1000 == milli-
+	 * @param t_power_of_10 does the same as t_ratio, but as a power of 10.
+	 *        Using 3 here would be the same as a kilo- prefix.
 	 *
 	 * This class is to enforce compile-time checking, and where possible,
 	 * compile-time calculation of SI values using constexpr.
@@ -25,33 +45,37 @@ namespace Mesi {
 	 * Note: MESI_LITERAL_TYPE may be defined to set the storage type
 	 * used by the operator literal overloads
 	 *
-	 * Note: Fractions must be reduced, i.e. the greatest common divisor
-	 * of numerator and denominator must be 1. To prevent compile-time
-	 * errors, use RationalType<>, which reduces fractions automatically.
+	 * Note: t_ratio should have any powers of 10 factored out into
+	 * t_power_of_10. To do this automatically, use RationalType<>
 	 *
 	 * @author Jameson Thatcher (a.k.a. SirEel)
 	 *
 	 */
 	template<typename T,
-		intmax_t t_m_n, intmax_t t_m_d,
-		intmax_t t_s_n, intmax_t t_s_d,
-		intmax_t t_kg_n, intmax_t t_kg_d,
-		intmax_t t_A_n, intmax_t t_A_d,
-		intmax_t t_K_n, intmax_t t_K_d,
-		intmax_t t_mol_n, intmax_t t_mol_d,
-		intmax_t t_cd_n, intmax_t t_cd_d>
+		typename t_m, typename t_s, typename t_kg, typename t_A, typename t_K, typename t_mol, typename t_cd,
+		typename t_ratio, intmax_t t_power_of_10>
 	struct RationalTypeReduced
 	{
 		using BaseType = T;
-		using ScalarType = RationalTypeReduced<T, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1>;
+	private:
+		using Zero = std::ratio<0,1>;
+		using One = std::ratio<1,1>;
+	public:
+		using ScalarType = RationalTypeReduced<T, Zero, Zero, Zero, Zero, Zero, Zero, Zero, One, 0>;
 
-		static_assert(std::ratio<t_m_n, t_m_d>::num == t_m_n, "The meter exponent fraction is not irreducible");
-		static_assert(std::ratio<t_s_n, t_s_d>::num == t_s_n, "The second exponent fraction is not irreducible");
-		static_assert(std::ratio<t_kg_n, t_kg_d>::num == t_kg_n, "The kilogram exponent fraction is not irreducible");
-		static_assert(std::ratio<t_A_n, t_A_d>::num == t_A_n, "The ampere exponent fraction is not irreducible");
-		static_assert(std::ratio<t_K_n, t_K_d>::num == t_K_n, "The Kelvin exponent fraction is not irreducible");
-		static_assert(std::ratio<t_mol_n, t_mol_d>::num == t_mol_n, "The mole exponent fraction is not irreducible");
-		static_assert(std::ratio<t_cd_n, t_cd_d>::num == t_cd_n, "The candela exponent fraction is not irreducible");
+		template<typename t_scale_ratio, intmax_t t_scale_10_to_the = 0>
+		using Scale = RationalTypeReduced<T, t_m, t_s, t_kg, t_A, t_K, t_mol, t_cd,
+		      typename _internal::RatioReduce<std::ratio_multiply<t_ratio, t_scale_ratio>, t_power_of_10+t_scale_10_to_the>::ratio, 
+		      _internal::RatioReduce<std::ratio_multiply<t_ratio, t_scale_ratio>, t_power_of_10+t_scale_10_to_the>::power>; 
+
+		template<intmax_t t_scale>
+		using Multiply = Scale<std::ratio<t_scale, 1>>;
+
+		template<intmax_t t_scale>
+		using Divide = Scale<std::ratio<1, t_scale>>;
+
+		template<intmax_t t_pow>
+		using ScaleByTenToThe = Scale<std::ratio<1,1>, t_pow>;
 
 		T val;
 
@@ -69,6 +93,25 @@ namespace Mesi {
 		explicit operator T() const {
 			return val;
 		}
+		
+		template<typename t_ratio2, intmax_t t_power_of_102>
+		explicit constexpr operator RationalTypeReduced<T, t_m, t_s, t_kg, t_A, t_K, t_mol, t_cd, t_ratio2, t_power_of_102>() const {
+			T nv = val;
+			using ratio = std::ratio_divide<t_ratio, t_ratio2>;
+			intmax_t pref_diff = t_power_of_10 - t_power_of_102;
+			while(pref_diff > 0)
+			{
+				nv *= 10;
+				pref_diff--;
+			}
+			while(pref_diff < 0)
+			{
+				nv /= 10;
+				pref_diff++;
+			}
+			nv = nv * ratio::num / ratio::den;
+			return RationalTypeReduced<T, t_m, t_s, t_kg, t_A, t_K, t_mol, t_cd, t_ratio2, t_power_of_102>(nv);
+		}
 
 		/**
 		 * getUnit will get a SI-style unit string for this class
@@ -78,7 +121,12 @@ namespace Mesi {
 			if( s_unitString.size() > 0 )
 				return s_unitString;
 
-#define DIM_TO_STRING(TP) if( t_##TP##_n == 1 && t_##TP##_d == 1 ) s_unitString += std::string(#TP) + " "; else if( t_##TP##_n != 0 && t_##TP##_d == 1) s_unitString += std::string(#TP) + "^" + std::to_string(static_cast<long long>(t_##TP##_n)) + " "; else if(t_##TP##_n != 0) s_unitString += std::string(#TP) + "^(" + std::to_string(static_cast<long long>(t_##TP##_n)) + "/" + std::to_string(static_cast<long long>(t_##TP##_d)) + ") ";
+			if( t_power_of_10 != 0 )
+			{
+				s_unitString += " * 10^" + std::to_string(static_cast<long long>(t_power_of_10)) + " ";
+			}
+
+#define DIM_TO_STRING(TP) if( t_##TP ::num == 1 && t_##TP ::den == 1 ) s_unitString += std::string(#TP) + " "; else if( t_##TP ::num != 0 && t_##TP ::den == 1) s_unitString += std::string(#TP) + "^" + std::to_string(static_cast<long long>(t_##TP ::num)) + " "; else if(t_##TP ::num != 0) s_unitString += std::string(#TP) + "^(" + std::to_string(static_cast<long long>(t_##TP ::num)) + "/" + std::to_string(static_cast<long long>(t_##TP ::den)) + ") ";
 			ALL_UNITS(DIM_TO_STRING)
 #undef DIM_TO_STRING
 			
@@ -86,56 +134,42 @@ namespace Mesi {
 			return s_unitString;
 		}
 
-		RationalTypeReduced& operator+=(
+		constexpr RationalTypeReduced& operator+=(
 			RationalTypeReduced const& rhs
 		) {
 			return (*this) = (*this) + rhs;
 		}
 
-		RationalTypeReduced& operator-=(
+		constexpr RationalTypeReduced& operator-=(
 			RationalTypeReduced const& rhs
 		) {
 			return (*this) = (*this) - rhs;
 		}
 
-		RationalTypeReduced& operator*=(T const& rhs) {
+		constexpr RationalTypeReduced& operator*=(T const& rhs) {
 			return (*this) = (*this) * rhs;
 		}
 
-		RationalTypeReduced& operator/=(T const& rhs) {
+		constexpr RationalTypeReduced& operator/=(T const& rhs) {
 			return (*this) = (*this) / rhs;
 		}
 
-		RationalTypeReduced& operator*=(ScalarType const& rhs) {
+		constexpr RationalTypeReduced& operator*=(ScalarType const& rhs) {
 			return (*this) = (*this) * rhs;
 		}
 
-		RationalTypeReduced& operator/=(ScalarType const& rhs) {
+		constexpr RationalTypeReduced& operator/=(ScalarType const& rhs) {
 			return (*this) = (*this) / rhs;
 		}
 	};
 
-	template<typename T,
-		intmax_t t_m_n, intmax_t t_m_d,
-		intmax_t t_s_n, intmax_t t_s_d,
-		intmax_t t_kg_n, intmax_t t_kg_d,
-		intmax_t t_A_n, intmax_t t_A_d,
-		intmax_t t_K_n, intmax_t t_K_d,
-		intmax_t t_mol_n, intmax_t t_mol_d,
-		intmax_t t_cd_n, intmax_t t_cd_d>
-	using RationalType = RationalTypeReduced<T,
-		std::ratio<t_m_n, t_m_d>::num, std::ratio<t_m_n, t_m_d>::den,
-		std::ratio<t_s_n, t_s_d>::num, std::ratio<t_s_n, t_s_d>::den,
-		std::ratio<t_kg_n, t_kg_d>::num, std::ratio<t_kg_n, t_kg_d>::den,
-		std::ratio<t_A_n, t_A_d>::num, std::ratio<t_A_n, t_A_d>::den,
-		std::ratio<t_K_n, t_K_d>::num, std::ratio<t_K_n, t_K_d>::den,
-		std::ratio<t_mol_n, t_mol_d>::num, std::ratio<t_mol_n, t_mol_d>::den,
-		std::ratio<t_cd_n, t_cd_d>::num, std::ratio<t_cd_n, t_cd_d>::den>;
+	template<typename T, typename t_m, typename t_s, typename t_kg, typename t_A, typename t_K, typename t_mol, typename t_cd, typename t_ratio, intmax_t t_power_of_10>
+	using RationalType = RationalTypeReduced<T, t_m, t_s, t_kg, t_A, t_K, t_mol, t_cd, typename _internal::RatioReduce<t_ratio, t_power_of_10>::ratio, _internal::RatioReduce<t_ratio, t_power_of_10>::power>;
 
-#define TYPE_A_FULL_PARAMS intmax_t t_m_n, intmax_t t_m_d, intmax_t t_s_n, intmax_t t_s_d, intmax_t t_kg_n, intmax_t t_kg_d, intmax_t t_A_n, intmax_t t_A_d, intmax_t t_K_n, intmax_t t_K_d, intmax_t t_mol_n, intmax_t t_mol_d, intmax_t t_cd_n, intmax_t t_cd_d
-#define TYPE_A_PARAMS t_m_n, t_m_d, t_s_n, t_s_d, t_kg_n, t_kg_d, t_A_n, t_A_d, t_K_n, t_K_d, t_mol_n, t_mol_d, t_cd_n, t_cd_d
-#define TYPE_B_FULL_PARAMS intmax_t t_m_n2, intmax_t t_m_d2, intmax_t t_s_n2, intmax_t t_s_d2, intmax_t t_kg_n2, intmax_t t_kg_d2, intmax_t t_A_n2, intmax_t t_A_d2, intmax_t t_K_n2, intmax_t t_K_d2, intmax_t t_mol_n2, intmax_t t_mol_d2, intmax_t t_cd_n2, intmax_t t_cd_d2
-#define TYPE_B_PARAMS t_m_n2, t_m_d2, t_s_n2, t_s_d2, t_kg_n2, t_kg_d2, t_A_n2, t_A_d2, t_K_n2, t_K_d2, t_mol_n2, t_mol_d2, t_cd_n2, t_cd_d2
+#define TYPE_A_FULL_PARAMS typename t_m, typename t_s, typename t_kg, typename t_A, typename t_K, typename t_mol, typename t_cd, typename t_ratio, intmax_t t_power_of_10
+#define TYPE_A_PARAMS t_m, t_s, t_kg, t_A, t_K, t_mol, t_cd, t_ratio, t_power_of_10
+#define TYPE_B_FULL_PARAMS typename t_m2, typename t_s2, typename t_kg2, typename t_A2, typename t_K2, typename t_mol2, typename t_cd2, typename t_ratio2, intmax_t t_power_of_102
+#define TYPE_B_PARAMS t_m2, t_s2, t_kg2, t_A2, t_K2, t_mol2, t_cd2, t_ratio2, t_power_of_102
 	/*
 	 * Arithmatic operators for combining SI values.
 	 */
@@ -160,10 +194,10 @@ namespace Mesi {
 		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
 		RationalTypeReduced<T, TYPE_B_PARAMS> const& right
 	) {
-#define ADD_FRAC(TP) using TP = std::ratio_add<std::ratio<t_##TP##_n, t_##TP##_d>, std::ratio<t_##TP##_n2, t_##TP##_d2>>;
+#define ADD_FRAC(TP) using TP = std::ratio_add<t_##TP, t_##TP##2>;
 		ALL_UNITS(ADD_FRAC)
 #undef ADD_FRAC
-		return RationalType<T, m::num, m::den, s::num, s::den, kg::num, kg::den, A::num, A::den, K::num, K::den, mol::num, mol::den, cd::num, cd::den>(left.val * right.val);
+		return RationalType<T, m, s, kg, A, K, mol, cd, std::ratio_multiply<t_ratio, t_ratio2>, t_power_of_10+t_power_of_102>(left.val * right.val);
 	}
 
 	template<typename T, TYPE_A_FULL_PARAMS, TYPE_B_FULL_PARAMS>
@@ -171,10 +205,10 @@ namespace Mesi {
 		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
 		RationalTypeReduced<T, TYPE_B_PARAMS> const& right
 	) {
-#define SUB_FRAC(TP) using TP = std::ratio_subtract<std::ratio<t_##TP##_n, t_##TP##_d>, std::ratio<t_##TP##_n2, t_##TP##_d2>>;
+#define SUB_FRAC(TP) using TP = std::ratio_subtract<t_##TP, t_##TP##2>;
 		ALL_UNITS(SUB_FRAC)
-	#undef SUB_FRAC
-		return RationalType<T, m::num, m::den, s::num, s::den, kg::num, kg::den, A::num, A::den, K::num, K::den, mol::num, mol::den, cd::num, cd::den>(left.val / right.val);
+#undef SUB_FRAC
+		return RationalType<T, m, s, kg, A, K, mol, cd, std::ratio_divide<t_ratio,t_ratio2>, t_power_of_10-t_power_of_102>(left.val / right.val);
 	}
 
 	/*
@@ -294,27 +328,56 @@ namespace Mesi {
 	 * Readable names for common types
 	 */
 
-	template<typename T, intmax_t t_m, intmax_t t_s, intmax_t t_kg, intmax_t t_A=0, intmax_t t_K=0, intmax_t t_mol=0, intmax_t t_cd=0>
-	using Type = RationalType<T, t_m, 1, t_s, 1, t_kg, 1, t_A, 1, t_K, 1, t_mol, 1, t_cd, 1>;
+	template<typename T, intmax_t t_m, intmax_t t_s, intmax_t t_kg, intmax_t t_A=0, intmax_t t_K=0, intmax_t t_mol=0, intmax_t t_cd=0, typename t_ratio = std::ratio<1,1>, intmax_t t_pref = 0>
+	using Type = RationalType<T, std::ratio<t_m, 1>, std::ratio<t_s, 1>, std::ratio<t_kg, 1>, std::ratio<t_A, 1>, std::ratio<t_K, 1>, std::ratio<t_mol, 1>, std::ratio<t_cd, 1>, t_ratio, t_pref>;
 
 #ifndef MESI_LITERAL_TYPE
 #	define MESI_LITERAL_TYPE float
 #endif
 
+	template<intmax_t t_power, typename T>
+	using Prefix = typename T::template ScaleByTenToThe<t_power>;
+
+	template<typename T> using Deca  = Prefix<1, T>;
+	template<typename T> using Hecto = Prefix<2, T>;
+	template<typename T> using Kilo  = Prefix<3, T>;
+	template<typename T> using Mega  = Prefix<6, T>;
+	template<typename T> using Giga  = Prefix<9, T>;
+	template<typename T> using Tera  = Prefix<12, T>;
+	template<typename T> using Peta  = Prefix<15, T>;
+	template<typename T> using Exa   = Prefix<18, T>;
+	template<typename T> using Zetta = Prefix<21, T>;
+	template<typename T> using Yotta = Prefix<24, T>;
+	
+	template<typename T> using Deci  = Prefix<-1, T>;
+	template<typename T> using Centi = Prefix<-2, T>;
+	template<typename T> using Milli = Prefix<-3, T>;
+	template<typename T> using Micro = Prefix<-6, T>;
+	template<typename T> using Nano  = Prefix<-9, T>;
+	template<typename T> using Pico  = Prefix<-12, T>;
+	template<typename T> using Femto = Prefix<-15, T>;
+	template<typename T> using Atto  = Prefix<-18, T>;
+	template<typename T> using Zepto = Prefix<-21, T>;
+	template<typename T> using Yocto = Prefix<-24, T>;
+	
 	using Scalar    = Type<MESI_LITERAL_TYPE, 0, 0, 0>;
 	using Meters    = Type<MESI_LITERAL_TYPE, 1, 0, 0>;
 	using Seconds   = Type<MESI_LITERAL_TYPE, 0, 1, 0>;
-	using Kilos     = Type<MESI_LITERAL_TYPE, 0, 0, 1>;
+	using Kilograms = Type<MESI_LITERAL_TYPE, 0, 0, 1>;
 	using Amperes   = Type<MESI_LITERAL_TYPE, 0, 0, 0, 1>;
 	using Kelvin    = Type<MESI_LITERAL_TYPE, 0, 0, 0, 0, 1>;
 	using Moles     = Type<MESI_LITERAL_TYPE, 0, 0, 0, 0, 0, 1>;
 	using Candela   = Type<MESI_LITERAL_TYPE, 0, 0, 0, 0, 0, 0, 1>;
-	using Newtons   = decltype(Meters{} * Kilos{} / Seconds{} / Seconds{});
+	using Minutes   = Seconds::Multiply<60>;
+	using Hours     = Minutes::Multiply<60>;
+	using Grams     = Milli<Kilograms>;
+	using Tonnes    = Kilo<Kilograms>;
+	using Newtons   = decltype(Meters{} * Kilograms{} / Seconds{} / Seconds{});
 	using NewtonsSq = decltype(Newtons{} * Newtons{});
 	using MetersSq  = decltype(Meters{} * Meters{});
 	using MetersCu  = decltype(Meters{} * MetersSq{});
 	using SecondsSq = decltype(Seconds{} * Seconds{});
-	using KilosSq   = decltype(Kilos{} * Kilos{});
+	using KilogramsSq = decltype(Kilograms{} * Kilograms{});
 	using Hertz     = decltype(Scalar{} / Seconds{});
 	using Pascals   = decltype(Newtons{} / MetersSq{});
 	using Joules    = decltype(Newtons{} * Meters{});
@@ -346,8 +409,8 @@ namespace Mesi {
 		LITERAL_TYPE(Mesi::MetersCu, _m3)
 		LITERAL_TYPE(Mesi::Seconds, _s)
 		LITERAL_TYPE(Mesi::SecondsSq, _s2)
-		LITERAL_TYPE(Mesi::Kilos, _kg)
-		LITERAL_TYPE(Mesi::KilosSq, _kg2)
+		LITERAL_TYPE(Mesi::Kilograms, _kg)
+		LITERAL_TYPE(Mesi::KilogramsSq, _kg2)
 		LITERAL_TYPE(Mesi::Newtons, _n)
 		LITERAL_TYPE(Mesi::NewtonsSq, _n2)
 		LITERAL_TYPE(Mesi::Hertz, _hz)

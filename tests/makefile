@@ -9,7 +9,7 @@ SRC_FILES = $(shell find . -name '*.cpp' | grep -v tee)
 
 all: $(TARGET)
 
-test:
+test: $(TARGET)
 	@echo "Running tests..."
 	@./$(TARGET)
 	@echo "Done"
