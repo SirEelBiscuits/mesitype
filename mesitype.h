@@ -41,14 +41,16 @@ namespace Mesi {
 	 * @brief Main class to store SI types
 	 *
 	 * @param T storage type parameter
-	 * @param t_m_n, t_m_d number of dimensions of meters as a rational number, e.g., t_m_n/t_m_d == 2 => m^2
-	 * @param t_s_* similar to t_m, but seconds
-	 * @param t_kg_* similar to t_m, but kilograms
-	 * @param t_A_* similar to t_m, but amperes
-	 * @param t_K_* similar to t_m, but Kelvin
-	 * @param t_mol_* similar to t_m, but moles
-	 * @param t_cd_* similar to t_m, but candela
-	 * @param t_pref_* defines a rational prefix, i.e. 1,1000 for 1/1000 == milli-
+	 * @param t_m number of dimensions of meters as a rational number, e.g., t_m == std::ratio<2,1> => m^2
+	 * @param t_s similar to t_m, but seconds
+	 * @param t_kg similar to t_m, but kilograms
+	 * @param t_A similar to t_m, but amperes
+	 * @param t_K similar to t_m, but Kelvin
+	 * @param t_mol similar to t_m, but moles
+	 * @param t_cd similar to t_m, but candela
+	 * @param t_ratio defines a scaling factor, i.e. 1,1000 for 1/1000 == milli-
+	 * @param t_power_of_10 does the same as t_ratio, but as a power of 10.
+	 *        Using 3 here would be the same as a kilo- prefix.
 	 *
 	 * This class is to enforce compile-time checking, and where possible,
 	 * compile-time calculation of SI values using constexpr.
@@ -56,9 +58,8 @@ namespace Mesi {
 	 * Note: MESI_LITERAL_TYPE may be defined to set the storage type
 	 * used by the operator literal overloads
 	 *
-	 * Note: Fractions must be reduced, i.e. the greatest common divisor
-	 * of numerator and denominator must be 1. To prevent compile-time
-	 * errors, use RationalType<>, which reduces fractions automatically.
+	 * Note: t_ratio should have any powers of 10 factored out into
+	 * t_power_of_10. To do this automatically, use RationalType<>
 	 *
 	 * @author Jameson Thatcher (a.k.a. SirEel)
 	 *
@@ -375,22 +376,31 @@ namespace Mesi {
 	using Webers    = decltype(Volts{} * Seconds{});
 	using Tesla     = decltype(Webers{} / MetersSq{});
 	using Henry     = decltype(Webers{} / Amperes{});
-	using Kilo      = Scalar::ScaleByTenToThe<3>;
-	using Mega      = decltype(Kilo{} * Kilo{});
-	using Giga      = decltype(Mega{} * Kilo{});
-	using Tera      = decltype(Giga{} * Kilo{});
-	using Peta      = decltype(Tera{} * Kilo{});
-	using Exa       = decltype(Peta{} * Kilo{});
-	using Zetta     = decltype(Exa{} * Kilo{});
-	using Yota      = decltype(Zetta{} * Kilo{});
-	using Milli     = decltype(Scalar{} / Kilo{});
-	using Micro     = decltype(Milli{} / Kilo{});
-	using Nano      = decltype(Micro{} / Kilo{});
-	using Pico      = decltype(Nano{} / Kilo{});
-	using Femto     = decltype(Pico{} / Kilo{});
-	using Atto      = decltype(Femto{} / Kilo{});
-	using Zepto     = decltype(Atto{} / Kilo{});
-	using Yocto     = decltype(Zepto{} / Kilo{});
+
+	template<intmax_t t_power, typename T>
+	using Prefix = typename T::template ScaleByTenToThe<t_power>;
+
+	template<typename T> using Deca  = Prefix<3, T>;
+	template<typename T> using Hecto = Prefix<3, T>;
+	template<typename T> using Kilo  = Prefix<3, T>;
+	template<typename T> using Mega  = Prefix<6, T>;
+	template<typename T> using Giga  = Prefix<9, T>;
+	template<typename T> using Tera  = Prefix<12, T>;
+	template<typename T> using Peta  = Prefix<15, T>;
+	template<typename T> using Exa   = Prefix<18, T>;
+	template<typename T> using Zetta = Prefix<21, T>;
+	template<typename T> using Yotta = Prefix<24, T>;
+	
+	template<typename T> using Deci  = Prefix<-1, T>;
+	template<typename T> using Centi = Prefix<-2, T>;
+	template<typename T> using Milli = Prefix<-3, T>;
+	template<typename T> using Micro = Prefix<-6, T>;
+	template<typename T> using Nano  = Prefix<-9, T>;
+	template<typename T> using Pico  = Prefix<-12, T>;
+	template<typename T> using Femto = Prefix<-15, T>;
+	template<typename T> using Atto  = Prefix<-18, T>;
+	template<typename T> using Zepto = Prefix<-21, T>;
+	template<typename T> using Yocto = Prefix<-24, T>;
 
 	namespace Literals {
 	/*

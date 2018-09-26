@@ -319,6 +319,14 @@ Tee_Test(test_literal_overloads) {
 	assert(Mesi::NewtonsSq(1) == 1_n2);
 }
 
+Tee_Test(test_conversions) {
+	using Meters = Mesi::Meters;
+	using Kilometers = Mesi::Kilo<Mesi::Meters>;
+
+	assert(Meters(1000) == Meters(Kilometers(1)));
+	assert(Mesi::Hours(1) == Mesi::Hours(Mesi::Minutes(60)));
+}
+
 int main() {
 	int successes;
 	vector<string> fails;
