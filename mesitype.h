@@ -5,33 +5,13 @@
 
 namespace Mesi {
 	namespace _internal {
-		template<intmax_t t_num>
-		struct NumReduce
-		{
-		private:
-			template<intmax_t N, intmax_t M>
-			struct H
-			{
-				static constexpr intmax_t num = N;
-				static constexpr intmax_t power = 0;
-			};
-			template<intmax_t N>
-			struct H<N, 0>
-			{
-				static constexpr intmax_t num = H<N/10,(N/10)%10>::num;
-				static constexpr intmax_t power = 1 + H<N/10,(N/10)%10>::power;
-			};
-		public:
-			static constexpr intmax_t num = H<t_num, t_num%10>::num;
-			static constexpr intmax_t power = H<t_num, t_num%10>::power;
-		};
 		template<typename t_ratio, intmax_t t_power>
 		struct RatioReduce
 		{
-			using num = NumReduce<t_ratio::num>;
-			using den = NumReduce<t_ratio::den>;
-			using ratio = typename std::ratio<num::num, den::num>;
-			static constexpr intmax_t power = t_power + num::power - den::power;
+			static constexpr intmax_t reduce_num(intmax_t num) { return (num % 10) != 0 ? num : reduce_num(num/10); }
+			static constexpr intmax_t reduce_pow(intmax_t num) { return (num % 10) != 0 ? 0 : (1 + reduce_pow(num/10)); }
+			using ratio = typename std::ratio<reduce_num(t_ratio::num), reduce_num(t_ratio::den)>;
+			static constexpr intmax_t power = t_power + reduce_pow(t_ratio::num) - reduce_pow(t_ratio::den);
 		};
 	}
 /* Utility macro for applying another macro to all known units, for internal use only */
