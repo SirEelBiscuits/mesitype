@@ -115,7 +115,7 @@ auto speed = 4_m / 1_s;
 
 will create a speed of 4 m/s.
 
-### Prefices
+### Prefixes
 
 SI prefixes like kilo-, mega-, milli- and so forth are available in the form:
 
@@ -150,7 +150,7 @@ version is in fact a simplified interface to the rational version).
 
 `Type` and `RationalType` have two extra template arguments, `t_ratio` and
 `t_power_of_ten`.
-`t_power_of_ten` is used to create SI prefices, but takes any integral value
+`t_power_of_ten` is used to create SI prefixes, but takes any integral value
 happily.
 `t_ratio` expects a `std::ratio` type, and is also just a multiplier to the
 value. It can be used to make non-decimal scaled units, like minutes
