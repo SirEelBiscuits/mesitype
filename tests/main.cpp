@@ -9,13 +9,6 @@
 
 using namespace std;
 
-static_assert(std::is_same<Mesi::_internal::RatioReduce<std::ratio<10,1>, 0>::ratio, std::ratio<1,1>>::value);
-static_assert(Mesi::_internal::RatioReduce<std::ratio<10,1>, 0>::power == 1);
-static_assert(std::is_same<Mesi::Seconds, Mesi::Minutes::Divide<60>>::value);
-static_assert(std::is_same<Mesi::Scalar::Multiply<2>::Multiply<3>, Mesi::Scalar::Multiply<6>>::value);
-static_assert(std::is_same<Mesi::Scalar::Multiply<2>::Divide<2>, Mesi::Scalar>::value);
-static_assert(std::is_same<Mesi::Scalar::Multiply<10>, Mesi::Scalar::ScaleByTenToThe<1>>::value);
-static_assert(std::is_same<Mesi::Scalar, Mesi::Scalar::Multiply<30>::Divide<600>::ScaleByTenToThe<1>::Multiply<2>>::value);
 
 Tee_Test(test_basic_rules) {
 	auto x = Mesi::Meters(3);
@@ -323,8 +316,61 @@ Tee_Test(test_conversions) {
 	using Meters = Mesi::Meters;
 	using Kilometers = Mesi::Kilo<Mesi::Meters>;
 
-	assert(Meters(1000) == Meters(Kilometers(1)));
-	assert(Mesi::Hours(1) == Mesi::Hours(Mesi::Minutes(60)));
+	Tee_SubTest(test_powers_of_ten) {
+		assert(Meters(1000) == Meters(Kilometers(1)));
+		assert(Mesi::Hours(1) == Mesi::Hours(Mesi::Minutes(60)));
+	}
+
+	Tee_SubTest(test_multiples) {
+		assert(Meters(Meters::Multiply<5>(1)) == Meters(5));
+	}
+
+	Tee_SubTest(test_divisions) {
+		assert(Meters(Meters::Divide<5>(5)) == Meters(1));
+	}
+}
+
+Tee_Test(test_prefixes) {
+	Tee_SubTest(test_all_prefixes) {
+		static_assert(std::is_same<Mesi::Deca<Mesi::Scalar>, Mesi::Scalar::ScaleByTenToThe<1>>::value);
+		static_assert(std::is_same<Mesi::Hecto<Mesi::Scalar>, Mesi::Scalar::ScaleByTenToThe<2>>::value);
+		static_assert(std::is_same<Mesi::Kilo<Mesi::Scalar>, Mesi::Scalar::ScaleByTenToThe<3>>::value);
+		static_assert(std::is_same<Mesi::Mega<Mesi::Scalar>, Mesi::Scalar::ScaleByTenToThe<6>>::value);
+		static_assert(std::is_same<Mesi::Giga<Mesi::Scalar>, Mesi::Scalar::ScaleByTenToThe<9>>::value);
+		static_assert(std::is_same<Mesi::Tera<Mesi::Scalar>, Mesi::Scalar::ScaleByTenToThe<12>>::value);
+		static_assert(std::is_same<Mesi::Peta<Mesi::Scalar>, Mesi::Scalar::ScaleByTenToThe<15>>::value);
+		static_assert(std::is_same<Mesi::Exa<Mesi::Scalar>, Mesi::Scalar::ScaleByTenToThe<18>>::value);
+		static_assert(std::is_same<Mesi::Zetta<Mesi::Scalar>, Mesi::Scalar::ScaleByTenToThe<21>>::value);
+		static_assert(std::is_same<Mesi::Yotta<Mesi::Scalar>, Mesi::Scalar::ScaleByTenToThe<24>>::value);
+		
+		static_assert(std::is_same<Mesi::Deci<Mesi::Scalar>, Mesi::Scalar::ScaleByTenToThe<-1>>::value);
+		static_assert(std::is_same<Mesi::Centi<Mesi::Scalar>, Mesi::Scalar::ScaleByTenToThe<-2>>::value);
+		static_assert(std::is_same<Mesi::Milli<Mesi::Scalar>, Mesi::Scalar::ScaleByTenToThe<-3>>::value);
+		static_assert(std::is_same<Mesi::Micro<Mesi::Scalar>, Mesi::Scalar::ScaleByTenToThe<-6>>::value);
+		static_assert(std::is_same<Mesi::Nano<Mesi::Scalar>, Mesi::Scalar::ScaleByTenToThe<-9>>::value);
+		static_assert(std::is_same<Mesi::Pico<Mesi::Scalar>, Mesi::Scalar::ScaleByTenToThe<-12>>::value);
+		static_assert(std::is_same<Mesi::Femto<Mesi::Scalar>, Mesi::Scalar::ScaleByTenToThe<-15>>::value);
+		static_assert(std::is_same<Mesi::Atto<Mesi::Scalar>, Mesi::Scalar::ScaleByTenToThe<-18>>::value);
+		static_assert(std::is_same<Mesi::Zepto<Mesi::Scalar>, Mesi::Scalar::ScaleByTenToThe<-21>>::value);
+		static_assert(std::is_same<Mesi::Yocto<Mesi::Scalar>, Mesi::Scalar::ScaleByTenToThe<-24>>::value);
+
+		assert(true);
+	}
+}
+
+Tee_Test(test_unit_scaling) {
+	using Scalar = Mesi::Scalar;
+	Tee_SubTest(test_unit_scaling_maths) {
+		static_assert(std::is_same<Scalar::Multiply<2>::Multiply<3>, Scalar::Multiply<6>>::value);
+		static_assert(std::is_same<Scalar::Multiply<2>::Divide<2>, Scalar>::value);
+		static_assert(std::is_same<Scalar, Mesi::Scalar::Multiply<30>::Divide<600>::ScaleByTenToThe<1>::Multiply<2>>::value);
+		assert(true);
+	}
+
+	Tee_SubTest(test_unit_scaling_uniqueness) {
+		static_assert(std::is_same<Scalar::Multiply<10>, Mesi::Scalar::ScaleByTenToThe<1>>::value);
+		static_assert(std::is_same<Scalar::Multiply<4>::Multiply<25>, Mesi::Scalar::ScaleByTenToThe<3>::ScaleByTenToThe<-1>>::value);
+	}
 }
 
 int main() {
