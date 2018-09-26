@@ -9,6 +9,14 @@
 
 using namespace std;
 
+static_assert(std::is_same<Mesi::_internal::RatioReduce<std::ratio<10,1>, 0>::ratio, std::ratio<1,1>>::value);
+static_assert(Mesi::_internal::RatioReduce<std::ratio<10,1>, 0>::power == 1);
+static_assert(std::is_same<Mesi::Seconds, Mesi::Minutes::Divide<60>>::value);
+static_assert(std::is_same<Mesi::Scalar::Multiply<2>::Multiply<3>, Mesi::Scalar::Multiply<6>>::value);
+static_assert(std::is_same<Mesi::Scalar::Multiply<2>::Divide<2>, Mesi::Scalar>::value);
+static_assert(std::is_same<Mesi::Scalar::Multiply<10>, Mesi::Scalar::ScaleByTenToThe<1>>::value);
+static_assert(std::is_same<Mesi::Scalar, Mesi::Scalar::Multiply<30>::Divide<600>::ScaleByTenToThe<1>::Multiply<2>>::value);
+
 Tee_Test(test_basic_rules) {
 	auto x = Mesi::Meters(3);
 	auto y = Mesi::Meters(4);
@@ -81,7 +89,7 @@ Tee_Test(test_scalar_rules) {
 }
 
 Tee_Test(test_divisor_rules) {
-	auto w = Mesi::RationalType<float, 1, 2, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1>(2);
+	auto w = Mesi::RationalType<float, std::ratio<1, 2>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0,1>, std::ratio<1,1>, 0>(2);
 	auto x = Mesi::Meters(3);
 	auto y = Mesi::Seconds(4);
 	auto z = Mesi::Kilograms(5);
@@ -120,7 +128,7 @@ Tee_Test(type_info_tests) {
 		auto s = Mesi::Scalar(1);
 		auto m = Mesi::Meters(1);
 		auto m2 = Mesi::MetersSq(1);
-		auto m1_2 = Mesi::RationalType<float, 1, 2, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1>(1);
+		auto m1_2 = Mesi::RationalType<float, std::ratio<1, 2>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0,1>, std::ratio<1,1>, 0>(1);
 
 		auto mUnit = std::regex(R"(m |m$)");
 		auto m2Unit = std::regex(R"(m\^)");
@@ -136,7 +144,7 @@ Tee_Test(type_info_tests) {
 		auto S = Mesi::Scalar(1);
 		auto s = Mesi::Seconds(1);
 		auto s2 = Mesi::SecondsSq(1);
-		auto s1_2 = Mesi::RationalType<float, 0, 1, 1, 2, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1>(1);
+		auto s1_2 = Mesi::RationalType<float, std::ratio<0, 1>, std::ratio<1, 2>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0,1>, std::ratio<1,1>, 0>(1);
 
 		auto sUnit = std::regex(R"(s |s$)");
 		auto s2Unit = std::regex(R"(s\^)");
@@ -152,7 +160,7 @@ Tee_Test(type_info_tests) {
 		auto s = Mesi::Scalar(1);
 		auto kg = Mesi::Kilograms(1);
 		auto kg2 = Mesi::KilogramsSq(1);
-		auto kg1_2 = Mesi::RationalType<float, 0, 1, 0, 1, 1, 2, 0, 1, 0, 1, 0, 1, 0, 1>(1);
+		auto kg1_2 = Mesi::RationalType<float, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1, 2>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0,1>, std::ratio<1,1>, 0>(1);
 
 		auto kgUnit = std::regex(R"(kg |kg$)");
 		auto kg2Unit = std::regex(R"(kg\^)");
@@ -166,7 +174,7 @@ Tee_Test(type_info_tests) {
 
 	Tee_SubTest(test_all_unit_indicators_match_units) {
 		auto mskg = Mesi::Type<float, 1, 1, 1>(1).getUnit();
-		auto m2s2kg2A1_2 = Mesi::RationalType<float, 2, 1, 2, 1, 2, 1, 1, 2, 0, 1, 0, 1, 0, 1>(1).getUnit();
+		auto m2s2kg2A1_2 = Mesi::RationalType<float, std::ratio<2, 1>, std::ratio<2, 1>, std::ratio<2, 1>, std::ratio<1, 2>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0,1>, std::ratio<1,1>, 0>(1).getUnit();
 
 		auto mUnit = std::regex(R"(m |m$)");
 		auto m2Unit = std::regex(R"(m\^)");
@@ -191,7 +199,7 @@ Tee_Test(test_multiplicative_behaviour) {
 		auto m = Mesi::Meters(2);
 		auto s = Mesi::Seconds(3);
 		auto kg = Mesi::Seconds(5);
-		auto A1_2 = Mesi::RationalType<float, 0, 1, 0, 1, 0, 1, 1, 2, 0, 1, 0, 1, 0, 1>(1);
+		auto A1_2 = Mesi::RationalType<float, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1, 2>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0,1>, std::ratio<1,1>, 0>(1);
 		auto mskgA1_2 = m * s * kg * A1_2;
 
 	Tee_SubTest(test_multiplying_values_consistent_with_floats) {
