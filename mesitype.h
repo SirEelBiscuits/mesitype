@@ -348,35 +348,6 @@ namespace Mesi {
 #	define MESI_LITERAL_TYPE float
 #endif
 
-	using Scalar    = Type<MESI_LITERAL_TYPE, 0, 0, 0>;
-	using Meters    = Type<MESI_LITERAL_TYPE, 1, 0, 0>;
-	using Seconds   = Type<MESI_LITERAL_TYPE, 0, 1, 0>;
-	using Kilograms = Type<MESI_LITERAL_TYPE, 0, 0, 1>;
-	using Amperes   = Type<MESI_LITERAL_TYPE, 0, 0, 0, 1>;
-	using Kelvin    = Type<MESI_LITERAL_TYPE, 0, 0, 0, 0, 1>;
-	using Moles     = Type<MESI_LITERAL_TYPE, 0, 0, 0, 0, 0, 1>;
-	using Candela   = Type<MESI_LITERAL_TYPE, 0, 0, 0, 0, 0, 0, 1>;
-	using Minutes   = Seconds::Multiply<60>;
-	using Hours     = Minutes::Multiply<60>;
-	using Newtons   = decltype(Meters{} * Kilograms{} / Seconds{} / Seconds{});
-	using NewtonsSq = decltype(Newtons{} * Newtons{});
-	using MetersSq  = decltype(Meters{} * Meters{});
-	using MetersCu  = decltype(Meters{} * MetersSq{});
-	using SecondsSq = decltype(Seconds{} * Seconds{});
-	using KilogramsSq = decltype(Kilograms{} * Kilograms{});
-	using Hertz     = decltype(Scalar{} / Seconds{});
-	using Pascals   = decltype(Newtons{} / MetersSq{});
-	using Joules    = decltype(Newtons{} * Meters{});
-	using Watts     = decltype(Joules{} / Seconds{});
-	using Coulombs  = decltype(Amperes{} * Seconds{});
-	using Volts     = decltype(Watts{} / Amperes{});
-	using Farads    = decltype(Coulombs{} / Volts{});
-	using Ohms      = decltype(Volts{} / Amperes{});
-	using Siemens   = decltype(Amperes{} / Volts{});
-	using Webers    = decltype(Volts{} * Seconds{});
-	using Tesla     = decltype(Webers{} / MetersSq{});
-	using Henry     = decltype(Webers{} / Amperes{});
-
 	template<intmax_t t_power, typename T>
 	using Prefix = typename T::template ScaleByTenToThe<t_power>;
 
@@ -401,6 +372,37 @@ namespace Mesi {
 	template<typename T> using Atto  = Prefix<-18, T>;
 	template<typename T> using Zepto = Prefix<-21, T>;
 	template<typename T> using Yocto = Prefix<-24, T>;
+	
+	using Scalar    = Type<MESI_LITERAL_TYPE, 0, 0, 0>;
+	using Meters    = Type<MESI_LITERAL_TYPE, 1, 0, 0>;
+	using Seconds   = Type<MESI_LITERAL_TYPE, 0, 1, 0>;
+	using Kilograms = Type<MESI_LITERAL_TYPE, 0, 0, 1>;
+	using Amperes   = Type<MESI_LITERAL_TYPE, 0, 0, 0, 1>;
+	using Kelvin    = Type<MESI_LITERAL_TYPE, 0, 0, 0, 0, 1>;
+	using Moles     = Type<MESI_LITERAL_TYPE, 0, 0, 0, 0, 0, 1>;
+	using Candela   = Type<MESI_LITERAL_TYPE, 0, 0, 0, 0, 0, 0, 1>;
+	using Minutes   = Seconds::Multiply<60>;
+	using Hours     = Minutes::Multiply<60>;
+	using Grams     = Milli<Kilograms>;
+	using Tonnes    = Kilo<Kilograms>;
+	using Newtons   = decltype(Meters{} * Kilograms{} / Seconds{} / Seconds{});
+	using NewtonsSq = decltype(Newtons{} * Newtons{});
+	using MetersSq  = decltype(Meters{} * Meters{});
+	using MetersCu  = decltype(Meters{} * MetersSq{});
+	using SecondsSq = decltype(Seconds{} * Seconds{});
+	using KilogramsSq = decltype(Kilograms{} * Kilograms{});
+	using Hertz     = decltype(Scalar{} / Seconds{});
+	using Pascals   = decltype(Newtons{} / MetersSq{});
+	using Joules    = decltype(Newtons{} * Meters{});
+	using Watts     = decltype(Joules{} / Seconds{});
+	using Coulombs  = decltype(Amperes{} * Seconds{});
+	using Volts     = decltype(Watts{} / Amperes{});
+	using Farads    = decltype(Coulombs{} / Volts{});
+	using Ohms      = decltype(Volts{} / Amperes{});
+	using Siemens   = decltype(Amperes{} / Volts{});
+	using Webers    = decltype(Volts{} * Seconds{});
+	using Tesla     = decltype(Webers{} / MetersSq{});
+	using Henry     = decltype(Webers{} / Amperes{});
 
 	namespace Literals {
 	/*
