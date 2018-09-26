@@ -11,8 +11,8 @@ compared to using floats (or whatever else), but this has not been checked yet.
 Authors
 -------
 
-Jameson Thatcher
-Valentin Ochs
+- Jameson Thatcher
+- Valentin Ochs
 
 Features
 --------
