@@ -380,8 +380,8 @@ namespace Mesi {
 	template<intmax_t t_power, typename T>
 	using Prefix = typename T::template ScaleByTenToThe<t_power>;
 
-	template<typename T> using Deca  = Prefix<3, T>;
-	template<typename T> using Hecto = Prefix<3, T>;
+	template<typename T> using Deca  = Prefix<1, T>;
+	template<typename T> using Hecto = Prefix<2, T>;
 	template<typename T> using Kilo  = Prefix<3, T>;
 	template<typename T> using Mega  = Prefix<6, T>;
 	template<typename T> using Giga  = Prefix<9, T>;
