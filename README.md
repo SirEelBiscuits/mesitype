@@ -92,9 +92,9 @@ These can be invoked as any of:
 * `_kg`
 * `_n`
 
-etc. Some of the suffices should contain uppercase letters, but all names
-starting with `_` followed by a capital letter are res
-
+etc. Some of the suffixes should contain uppercase letters, but all names
+starting with `_` followed by a capital letter are reserved at all scopes.
+As a result we've opted to use lower-case letters for all units.
 
 To make these available, do:
 
