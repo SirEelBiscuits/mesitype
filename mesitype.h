@@ -148,11 +148,6 @@ namespace Mesi {
 		typename t_ratio, intmax_t t_exponent_denominator, typename t_power_of_ten>
 	struct RationalTypeReduced
 	{
-		static constexpr intmax_t RN = t_ratio::num;
-		static constexpr intmax_t RD = t_ratio::den;
-		static constexpr intmax_t ED = t_exponent_denominator;
-		static constexpr intmax_t PN = t_power_of_ten::num;
-		static constexpr intmax_t PD = t_power_of_ten::den;
 		using BaseType = T;
 	private:
 		using Zero = std::ratio<0,1>;
