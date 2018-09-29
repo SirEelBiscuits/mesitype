@@ -9,108 +9,108 @@ namespace Mesi {
 		template<typename t_rat_1, intmax_t t_exp_den_1, typename t_po10_1, typename t_rat_2, intmax_t t_exp_den_2, typename t_po10_2>
 		struct ScalingSimplify
 		{
-        private:
-            struct Helper
-            {
-                template<intmax_t base, intmax_t pow>
-                struct Exp
-                {
-                    static_assert((pow == 0 || (std::numeric_limits<intmax_t>::max() / base / Exp<base, pow-1>::value) != 0), "pow must not overflow");
-                    static constexpr intmax_t value = base * Exp<base, pow-1>::value;
-                };
+		private:
+			struct Helper
+			{
+				template<intmax_t base, intmax_t pow>
+				struct Exp
+				{
+					static_assert((pow == 0 || (std::numeric_limits<intmax_t>::max() / base / Exp<base, pow-1>::value) != 0), "pow must not overflow");
+					static constexpr intmax_t value = base * Exp<base, pow-1>::value;
+				};
 
-                template<intmax_t base>
-                struct Exp<base, 0>
-                {
-                    static constexpr intmax_t value = 1;
-                };
+				template<intmax_t base>
+				struct Exp<base, 0>
+				{
+					static constexpr intmax_t value = 1;
+				};
 
-                template<intmax_t a, intmax_t b>
-                struct Mul
-                {
-                    static_assert(std::numeric_limits<intmax_t>::max() / a / b, "a*b must not overflow");
-                    static constexpr intmax_t value = a*b;
-                };
+				template<intmax_t a, intmax_t b>
+				struct Mul
+				{
+					static_assert(std::numeric_limits<intmax_t>::max() / a / b, "a*b must not overflow");
+					static constexpr intmax_t value = a*b;
+				};
 
-                using p_ratio = std::ratio<
-                    Mul<Exp<t_rat_1::num, t_exp_den_2>::value, Exp<t_rat_2::num, t_exp_den_1>::value>::value,
-                    Mul<Exp<t_rat_1::den, t_exp_den_2>::value, Exp<t_rat_2::den, t_exp_den_1>::value>::value>;
+				using p_ratio = std::ratio<
+					Mul<Exp<t_rat_1::num, t_exp_den_2>::value, Exp<t_rat_2::num, t_exp_den_1>::value>::value,
+					Mul<Exp<t_rat_1::den, t_exp_den_2>::value, Exp<t_rat_2::den, t_exp_den_1>::value>::value>;
 
-                constexpr Helper()
-                : p_num(p_ratio::num), p_den(p_ratio::den), p_power_of_ten(0), p_exp_den(t_exp_den_1 * t_exp_den_2)
-                {
-                    for(intmax_t d = 2; d < p_exp_den; d++)
-                    {
-                        while(p_exp_den % d == 0)
-                        {
-                            // This is a factor of the exponent's denominator, try to take the d-th root of numerator and denominator
-                            intmax_t rn = root(p_num, d);
-                            intmax_t rd = root(p_den, d);
-                            if(rn && rd)
-                            {
-                                // The d-th root of both is integer, so use these values going forward
-                                p_exp_den /= d;
-                                p_num = rn;
-                                p_den = rd;
-                            }
-                            else
-                            {
-                                // Can't take the d-th root, continue looking for other factors
-                                break;
-                            }
-                        }
-                    }
+				constexpr Helper()
+				: p_num(p_ratio::num), p_den(p_ratio::den), p_power_of_ten(0), p_exp_den(t_exp_den_1 * t_exp_den_2)
+				{
+					for(intmax_t d = 2; d < p_exp_den; d++)
+					{
+						while(p_exp_den % d == 0)
+						{
+							// This is a factor of the exponent's denominator, try to take the d-th root of numerator and denominator
+							intmax_t rn = root(p_num, d);
+							intmax_t rd = root(p_den, d);
+							if(rn && rd)
+							{
+								// The d-th root of both is integer, so use these values going forward
+								p_exp_den /= d;
+								p_num = rn;
+								p_den = rd;
+							}
+							else
+							{
+								// Can't take the d-th root, continue looking for other factors
+								break;
+							}
+						}
+					}
 
-                    while((p_num % 10) == 0)
-                    {
-                        p_num /= 10;
-                        p_power_of_ten++;
-                    }
-                    while((p_den % 10) == 0)
-                    {
-                        p_den /= 10;
-                        p_power_of_ten--;
-                    }
-                }
+					while((p_num % 10) == 0)
+					{
+						p_num /= 10;
+						p_power_of_ten++;
+					}
+					while((p_den % 10) == 0)
+					{
+						p_den /= 10;
+						p_power_of_ten--;
+					}
+				}
 
-                intmax_t p_num;
-                intmax_t p_den;
-                intmax_t p_power_of_ten;
-                intmax_t p_exp_den;
+				intmax_t p_num;
+				intmax_t p_den;
+				intmax_t p_power_of_ten;
+				intmax_t p_exp_den;
 
-                constexpr intmax_t root(intmax_t base, intmax_t r)
-                {
-                    intmax_t ret = 1;
-                    while(pow(ret, r) < base)
-                    {
-                        ret++;
-                    }
-                    if(pow(ret, r) == base)
-                    {
-                        return ret;
-                    }
-                    else
-                    {
-                        return 0;
-                    }
-                }
+				constexpr intmax_t root(intmax_t base, intmax_t r)
+				{
+					intmax_t ret = 1;
+					while(pow(ret, r) < base)
+					{
+						ret++;
+					}
+					if(pow(ret, r) == base)
+					{
+						return ret;
+					}
+					else
+					{
+						return 0;
+					}
+				}
 
-                constexpr intmax_t pow(intmax_t base, intmax_t exp)
-                {
-                    intmax_t ret = 1;
-                    while(exp > 0)
-                    {
-                        ret *= base;
-                        exp--;
-                    }
-                    return ret;
-                }
-            };
+				constexpr intmax_t pow(intmax_t base, intmax_t exp)
+				{
+					intmax_t ret = 1;
+					while(exp > 0)
+					{
+						ret *= base;
+						exp--;
+					}
+					return ret;
+				}
+			};
 
-        public:
-            using ratio = std::ratio<Helper().p_num, Helper().p_den>;
-            static constexpr intmax_t exponent_denominator = Helper().p_exp_den;
-            using power_of_ten = std::ratio_add<std::ratio_add<t_po10_1, t_po10_2>, std::ratio<Helper().p_power_of_ten, Helper().p_exp_den>>;
+		public:
+			using ratio = std::ratio<Helper().p_num, Helper().p_den>;
+			static constexpr intmax_t exponent_denominator = Helper().p_exp_den;
+			using power_of_ten = std::ratio_add<std::ratio_add<t_po10_1, t_po10_2>, std::ratio<Helper().p_power_of_ten, Helper().p_exp_den>>;
 		};
 	}
 /* Utility macro for applying another macro to all known units, for internal use only */
@@ -148,11 +148,11 @@ namespace Mesi {
 		typename t_ratio, intmax_t t_exponent_denominator, typename t_power_of_ten>
 	struct RationalTypeReduced
 	{
-        static constexpr intmax_t RN = t_ratio::num;
-        static constexpr intmax_t RD = t_ratio::den;
-        static constexpr intmax_t ED = t_exponent_denominator;
-        static constexpr intmax_t PN = t_power_of_ten::num;
-        static constexpr intmax_t PD = t_power_of_ten::den;
+		static constexpr intmax_t RN = t_ratio::num;
+		static constexpr intmax_t RD = t_ratio::den;
+		static constexpr intmax_t ED = t_exponent_denominator;
+		static constexpr intmax_t PN = t_power_of_ten::num;
+		static constexpr intmax_t PD = t_power_of_ten::den;
 		using BaseType = T;
 	private:
 		using Zero = std::ratio<0,1>;
@@ -162,9 +162,9 @@ namespace Mesi {
 
 		template<typename t_scale_ratio, intmax_t t_scale_10_to_the = 0>
 		using Scale = RationalTypeReduced<T, t_m, t_s, t_kg, t_A, t_K, t_mol, t_cd,
-		      typename _internal::ScalingSimplify<t_ratio, t_exponent_denominator, t_power_of_ten, t_scale_ratio, 1, std::ratio<t_scale_10_to_the,1>>::ratio,
-		      _internal::ScalingSimplify<t_ratio, t_exponent_denominator, t_power_of_ten, t_scale_ratio, 1, std::ratio<t_scale_10_to_the,1>>::exponent_denominator,
-		      typename _internal::ScalingSimplify<t_ratio, t_exponent_denominator, t_power_of_ten, t_scale_ratio, 1, std::ratio<t_scale_10_to_the,1>>::power_of_ten>;
+			  typename _internal::ScalingSimplify<t_ratio, t_exponent_denominator, t_power_of_ten, t_scale_ratio, 1, std::ratio<t_scale_10_to_the,1>>::ratio,
+			  _internal::ScalingSimplify<t_ratio, t_exponent_denominator, t_power_of_ten, t_scale_ratio, 1, std::ratio<t_scale_10_to_the,1>>::exponent_denominator,
+			  typename _internal::ScalingSimplify<t_ratio, t_exponent_denominator, t_power_of_ten, t_scale_ratio, 1, std::ratio<t_scale_10_to_the,1>>::power_of_ten>;
 
 		template<intmax_t t_scale>
 		using Multiply = Scale<std::ratio<t_scale, 1>>;
@@ -194,20 +194,20 @@ namespace Mesi {
 
 		template<typename t_ratio2, intmax_t t_exponent_denominator2, typename t_power_of_ten2>
 		explicit constexpr operator RationalTypeReduced<T, t_m, t_s, t_kg, t_A, t_K, t_mol, t_cd, t_ratio2, t_exponent_denominator2, t_power_of_ten2>() const {
-            using Scale = _internal::ScalingSimplify<t_ratio, t_exponent_denominator, t_power_of_ten, std::ratio<t_ratio2::den, t_ratio2::num>, t_exponent_denominator2, std::ratio<-t_power_of_ten2::num, t_power_of_ten2::den>>;
+			using Scale = _internal::ScalingSimplify<t_ratio, t_exponent_denominator, t_power_of_ten, std::ratio<t_ratio2::den, t_ratio2::num>, t_exponent_denominator2, std::ratio<-t_power_of_ten2::num, t_power_of_ten2::den>>;
 			T nv = val;
 
+			// TODO: Scale properly. Will need pow<T> for this if the exponent denominators require it...
 			static_assert(Scale::power_of_ten::den == 1, "Conversions only work if the powers of ten difference between scaling ratios is integral at the moment");
 			static_assert(Scale::exponent_denominator == 1, "Conversions only work for rational scaling at the moment");
 
 			nv *= Scale::ratio::num;
 			nv /= Scale::ratio::den;
 			for(intmax_t i = 0; i < Scale::power_of_ten::num; i++)
-                nv *= 10;
+				nv *= 10;
 			for(intmax_t i = 0; i > Scale::power_of_ten::num; i--)
-                nv /= 10;
+				nv /= 10;
 
-			// TODO: Scale properly. Will need pow<T> for this if the exponent denominators require it...
 			return RationalTypeReduced<T, t_m, t_s, t_kg, t_A, t_K, t_mol, t_cd, t_ratio2, t_exponent_denominator2, t_power_of_ten2>(nv);
 		}
 
@@ -224,14 +224,14 @@ namespace Mesi {
 				s_unitString += " * 10^";
 				if(t_power_of_ten::den != 1)
 				{
-                    s_unitString += "(";
+					s_unitString += "(";
 				}
 				s_unitString += std::to_string(static_cast<long long>(t_power_of_ten::num));
 				if(t_power_of_ten::den != 1)
 				{
-                    s_unitString += "/" + std::to_string(static_cast<long long>(t_power_of_ten::den));
+					s_unitString += "/" + std::to_string(static_cast<long long>(t_power_of_ten::den));
 				}
-                s_unitString += " ";
+				s_unitString += " ";
 			}
 
 #define DIM_TO_STRING(TP) if( t_##TP ::num == 1 && t_##TP ::den == 1 ) s_unitString += std::string(#TP) + " "; else if( t_##TP ::num != 0 && t_##TP ::den == 1) s_unitString += std::string(#TP) + "^" + std::to_string(static_cast<long long>(t_##TP ::num)) + " "; else if(t_##TP ::num != 0) s_unitString += std::string(#TP) + "^(" + std::to_string(static_cast<long long>(t_##TP ::num)) + "/" + std::to_string(static_cast<long long>(t_##TP ::den)) + ") ";
@@ -273,9 +273,9 @@ namespace Mesi {
 
 	template<typename T, typename t_m, typename t_s, typename t_kg, typename t_A, typename t_K, typename t_mol, typename t_cd, typename t_ratio, intmax_t t_exponent_denominator, typename t_power_of_ten>
 	using RationalType = RationalTypeReduced<T, t_m, t_s, t_kg, t_A, t_K, t_mol, t_cd,
-        typename _internal::ScalingSimplify<t_ratio, t_exponent_denominator, t_power_of_ten, std::ratio<1,1>, 1, std::ratio<0,1>>::ratio,
-        _internal::ScalingSimplify<t_ratio, t_exponent_denominator, t_power_of_ten, std::ratio<1,1>, 1, std::ratio<0,1>>::exponent_denominator,
-        typename _internal::ScalingSimplify<t_ratio, t_exponent_denominator, t_power_of_ten, std::ratio<1,1>, 1, std::ratio<0,1>>::power_of_ten>;
+		typename _internal::ScalingSimplify<t_ratio, t_exponent_denominator, t_power_of_ten, std::ratio<1,1>, 1, std::ratio<0,1>>::ratio,
+		_internal::ScalingSimplify<t_ratio, t_exponent_denominator, t_power_of_ten, std::ratio<1,1>, 1, std::ratio<0,1>>::exponent_denominator,
+		typename _internal::ScalingSimplify<t_ratio, t_exponent_denominator, t_power_of_ten, std::ratio<1,1>, 1, std::ratio<0,1>>::power_of_ten>;
 
 #define TYPE_A_FULL_PARAMS typename t_m, typename t_s, typename t_kg, typename t_A, typename t_K, typename t_mol, typename t_cd, typename t_ratio, intmax_t t_ratio_exponent_denominator, typename t_power_of_ten
 #define TYPE_A_PARAMS t_m, t_s, t_kg, t_A, t_K, t_mol, t_cd, t_ratio, t_ratio_exponent_denominator, t_power_of_ten
@@ -305,7 +305,7 @@ namespace Mesi {
 		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
 		RationalTypeReduced<T, TYPE_B_PARAMS> const& right
 	) {
-        using Scale = _internal::ScalingSimplify<t_ratio, t_ratio_exponent_denominator, t_power_of_ten, t_ratio2, t_ratio_exponent_denominator2, t_power_of_ten2>;
+		using Scale = _internal::ScalingSimplify<t_ratio, t_ratio_exponent_denominator, t_power_of_ten, t_ratio2, t_ratio_exponent_denominator2, t_power_of_ten2>;
 #define ADD_FRAC(TP) using TP = std::ratio_add<t_##TP, t_##TP##2>;
 		ALL_UNITS(ADD_FRAC)
 #undef ADD_FRAC
@@ -317,7 +317,7 @@ namespace Mesi {
 		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
 		RationalTypeReduced<T, TYPE_B_PARAMS> const& right
 	) {
-        using Scale = _internal::ScalingSimplify<t_ratio, t_ratio_exponent_denominator, t_power_of_ten, std::ratio<t_ratio2::den, t_ratio2::num>, t_ratio_exponent_denominator2, std::ratio<-t_power_of_ten2::num, t_power_of_ten2::den>>;
+		using Scale = _internal::ScalingSimplify<t_ratio, t_ratio_exponent_denominator, t_power_of_ten, std::ratio<t_ratio2::den, t_ratio2::num>, t_ratio_exponent_denominator2, std::ratio<-t_power_of_ten2::num, t_power_of_ten2::den>>;
 #define SUB_FRAC(TP) using TP = std::ratio_subtract<t_##TP, t_##TP##2>;
 		ALL_UNITS(SUB_FRAC)
 #undef SUB_FRAC
