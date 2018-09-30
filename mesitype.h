@@ -88,24 +88,20 @@ namespace Mesi {
 		private:
 			struct Helper
 			{
-				template<intmax_t base, intmax_t pow>
-				struct Exp
-				{
-					static_assert((pow == 0 || (std::numeric_limits<intmax_t>::max() / base / Exp<base, pow-1>::value) != 0), "pow must not overflow");
-					static constexpr intmax_t value = base * Exp<base, pow-1>::value;
-				};
-
-				template<intmax_t base>
-				struct Exp<base, 0>
-				{
-					static constexpr intmax_t value = 1;
-				};
-
 				template<intmax_t a, intmax_t b>
 				struct Mul
 				{
 					static_assert(std::numeric_limits<intmax_t>::max() / a / b, "a*b must not overflow");
 					static constexpr intmax_t value = a*b;
+				};
+
+				template<intmax_t base, intmax_t pow>
+				struct Exp : public Mul<base, Exp<base, pow-1>::value> {};
+
+				template<intmax_t base>
+				struct Exp<base, 0>
+				{
+					static constexpr intmax_t value = 1;
 				};
 
 				using p_ratio = std::ratio<
