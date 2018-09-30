@@ -39,7 +39,7 @@ namespace Mesi {
 			public:
 				static T value()
 				{
-					static T v = calculate_value();
+					constexpr T v = calculate_value();
 					return v;
 				}
 			};
@@ -57,7 +57,7 @@ namespace Mesi {
 			{
 				static T value()
 				{
-					static T v = T(r::num)/T(r::den);
+					constexpr T v = T(r::num)/T(r::den);
 					return v;
 				}
 			};
