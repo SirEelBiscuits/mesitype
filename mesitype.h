@@ -150,12 +150,15 @@ namespace Mesi {
 			using ratio = std::ratio<Helper().p_num, Helper().p_den>;
 			static constexpr intmax_t exponent_denominator = Helper().p_exp_den;
 			using power_of_ten = std::ratio_add<std::ratio_add<t_po10_1, t_po10_2>, std::ratio<Helper().p_power_of_ten, Helper().p_exp_den>>;
-			
+
 			template<typename T>
 			static constexpr T value = calculate_value<T, ratio, exponent_denominator, power_of_ten>();
 			static constexpr float vr = RatioValue<float, ratio, exponent_denominator>::value;
 			static constexpr float pr = PowerOfTenValue<float, power_of_ten>::value;
 		};
+
+		template<typename t_ratio, intmax_t t_exp_den, typename t_power_of_ten, typename t_power>
+		using ScalingPower = ScalingSimplify<t_ratio, t_exp_den * t_power::den, std::ratio_multiply<t_power_of_ten, t_power>, std::ratio<1,1>, t_power::num, std::ratio<0,1>>;
 	}
 /* Utility macro for applying another macro to all known units, for internal use only */
 #define ALL_UNITS(op) op(m) op(s) op(kg) op(A) op(K) op(mol) op(cd)
@@ -214,6 +217,19 @@ namespace Mesi {
 		template<intmax_t t_pow>
 		using ScaleByTenToThe = Scale<std::ratio<1,1>, t_pow>;
 
+		template<typename t_pow>
+		using Pow = RationalTypeReduced<T,
+			  std::ratio_multiply<t_m, t_pow>,
+			  std::ratio_multiply<t_s, t_pow>,
+			  std::ratio_multiply<t_kg, t_pow>,
+			  std::ratio_multiply<t_A, t_pow>,
+			  std::ratio_multiply<t_K, t_pow>,
+			  std::ratio_multiply<t_mol, t_pow>,
+			  std::ratio_multiply<t_cd, t_pow>,
+			  typename _internal::ScalingPower<t_ratio, t_exponent_denominator, t_power_of_ten, t_pow>::ratio,
+			  _internal::ScalingPower<t_ratio, t_exponent_denominator, t_power_of_ten, t_pow>::exponent_denominator,
+			  typename _internal::ScalingPower<t_ratio, t_exponent_denominator, t_power_of_ten, t_pow>::power_of_ten>;
+
 		T val;
 
 		constexpr RationalTypeReduced()
@@ -247,9 +263,34 @@ namespace Mesi {
 			if( s_unitString.size() > 0 )
 				return s_unitString;
 
+			if( t_ratio::num != 1 )
+			{
+				s_unitString += " * ";
+				if( t_exponent_denominator != 1 && t_ratio::den != 1 )
+				{
+					s_unitString += "(";
+				}
+				s_unitString += std::to_string(t_ratio::num);
+				if( t_ratio::den != 1 )
+				{
+					s_unitString += "/" + std::to_string(t_ratio::den);
+				}
+				if( t_exponent_denominator != 1 )
+				{
+					if( t_ratio::den != 1 )
+					{
+						s_unitString += ")";
+					}
+					s_unitString += "^(1/";
+					s_unitString += std::to_string(t_exponent_denominator);
+					s_unitString += ")";
+				}
+				s_unitString += " ";
+			}
+
 			if( t_power_of_ten::num != 0 )
 			{
-				s_unitString += " * 10^";
+				s_unitString += "* 10^";
 				if(t_power_of_ten::den != 1)
 				{
 					s_unitString += "(";
@@ -257,7 +298,7 @@ namespace Mesi {
 				s_unitString += std::to_string(static_cast<long long>(t_power_of_ten::num));
 				if(t_power_of_ten::den != 1)
 				{
-					s_unitString += "/" + std::to_string(static_cast<long long>(t_power_of_ten::den));
+					s_unitString += "/" + std::to_string(static_cast<long long>(t_power_of_ten::den)) + ")";
 				}
 				s_unitString += " ";
 			}

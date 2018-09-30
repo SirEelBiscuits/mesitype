@@ -362,16 +362,16 @@ Tee_Test(test_unit_scaling) {
 	Tee_SubTest(test_scaling_helpers) {
 		using S1 = Mesi::_internal::ScalingSimplify<std::ratio<1,2>, 1, std::ratio<0,1>, std::ratio<2,1>, 1, std::ratio<0, 1>>;
 		assert(S1::value<float> == 1);
-		
+
 		using S2 = Mesi::_internal::ScalingSimplify<std::ratio<1,2>, 2, std::ratio<0,1>, std::ratio<1,2>, 2, std::ratio<0, 1>>;
 		assert(S2::value<float> == 0.5);
-		
+
 		using S3 = Mesi::_internal::ScalingSimplify<std::ratio<1,1>, 1, std::ratio<1,2>, std::ratio<1,1>, 1, std::ratio<1, 2>>;
 		assert(S3::value<float> == 10);
-		
+
 		using S4 = Mesi::_internal::ScalingSimplify<std::ratio<1,1>, 1, std::ratio<1,2>, std::ratio<1,1>, 1, std::ratio<0, 1>>;
 		assert(S4::value<float> == std::pow(10.f, 0.5f));
-		
+
 		using S5 = Mesi::_internal::ScalingSimplify<std::ratio<2,1>, 2, std::ratio<0,1>, std::ratio<1,1>, 1, std::ratio<0, 1>>;
 		assert(S5::value<float> == std::pow(2.f, 0.5f));
 
@@ -387,6 +387,24 @@ Tee_Test(test_unit_scaling) {
 	Tee_SubTest(test_unit_scaling_uniqueness) {
 		assert((std::is_same<Scalar::Multiply<10>, Mesi::Scalar::ScaleByTenToThe<1>>::value));
 		assert((std::is_same<Scalar::Multiply<4>::Multiply<25>, Mesi::Scalar::ScaleByTenToThe<3>::ScaleByTenToThe<-1>>::value));
+	}
+}
+
+Tee_Test(test_unit_exponentiation) {
+	using Minutes = Mesi::Minutes;
+
+	Tee_SubTest(test_helper) {
+		using RootScale = Mesi::_internal::ScalingPower<std::ratio<6,1>, 1, std::ratio<1,1>, std::ratio<1,2>>;
+		assert(RootScale::ratio::num == 6);
+		assert(RootScale::ratio::den == 1);
+		assert(RootScale::exponent_denominator == 2);
+		assert(RootScale::power_of_ten::num == 1);
+		assert(RootScale::power_of_ten::den == 2);
+	}
+
+	Tee_SubTest(test_sqrt) {
+		using SqMin = Minutes::Pow<std::ratio<1,2>>;
+		assert((std::is_same<decltype(SqMin{}*SqMin{}), Minutes>::value));
 	}
 }
 
