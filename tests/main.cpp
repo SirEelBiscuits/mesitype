@@ -10,7 +10,6 @@
 
 using namespace std;
 
-
 Tee_Test(test_basic_rules) {
 	auto x = Mesi::Meters(3);
 	auto y = Mesi::Meters(4);
@@ -400,18 +399,18 @@ Tee_Test(test_unit_exponentiation) {
 	using Minutes = Mesi::Minutes;
 
 	Tee_SubTest(test_helper) {
-		using RootScale = Mesi::_internal::ScalingPower<Mesi::_internal::Scale<std::ratio<6,1>, 1, std::ratio<1,1>>, std::ratio<1,2>>::Scale;
+		using RootScale = Mesi::_internal::ScalePower<Mesi::_internal::Scale<std::ratio<6,1>, 1, std::ratio<1,1>>, std::ratio<1,2>>::Scale;
 		assert(RootScale::ratio::num == 6);
 		assert(RootScale::ratio::den == 1);
 		assert(RootScale::exponent_denominator == 2);
 		assert(RootScale::power_of_ten::num == 1);
 		assert(RootScale::power_of_ten::den == 2);
 		
-		using ScalarScale = Mesi::_internal::ScalingPower<RootScale, std::ratio<2,1>>::Scale;
-		assert(ScalarScale::ratio::num == 1);
+		using ScalarScale = Mesi::_internal::ScalePower<RootScale, std::ratio<2,1>>::Scale;
+		assert(ScalarScale::ratio::num == 6);
 		assert(ScalarScale::ratio::den == 1);
 		assert(ScalarScale::exponent_denominator == 1);
-		assert(ScalarScale::power_of_ten::num == 0);
+		assert(ScalarScale::power_of_ten::num == 1);
 		assert(ScalarScale::power_of_ten::den == 1);
 	}
 
