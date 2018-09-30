@@ -359,24 +359,30 @@ Tee_Test(test_prefixes) {
 
 Tee_Test(test_unit_scaling) {
 	using Scalar = Mesi::Scalar;
+	using namespace Mesi::_internal;
+	using Zero = std::ratio<0,1>;
+	using One = std::ratio<1,1>;
+	using Two = std::ratio<2,1>;
+	using OneHalf = std::ratio<1,2>;
+
 	Tee_SubTest(test_scaling_helpers) {
-		using S1 = Mesi::_internal::ScalingSimplify<std::ratio<1,2>, 1, std::ratio<0,1>, std::ratio<2,1>, 1, std::ratio<0, 1>>;
-		assert(S1::value<float> == 1);
+		using S1 = ScaleMultiply<Scale<OneHalf, 1, Zero    >, Scale<Two,     1, Zero>   >::Scale;
+		assert(S1::value<float>() == 1);
 
-		using S2 = Mesi::_internal::ScalingSimplify<std::ratio<1,2>, 2, std::ratio<0,1>, std::ratio<1,2>, 2, std::ratio<0, 1>>;
-		assert(S2::value<float> == 0.5);
+		using S2 = ScaleMultiply<Scale<OneHalf, 2, Zero    >, Scale<OneHalf, 2, Zero>   >::Scale;
+		assert(S2::value<float>() == 0.5);
 
-		using S3 = Mesi::_internal::ScalingSimplify<std::ratio<1,1>, 1, std::ratio<1,2>, std::ratio<1,1>, 1, std::ratio<1, 2>>;
-		assert(S3::value<float> == 10);
+		using S3 = ScaleMultiply<Scale<One,     1, OneHalf >, Scale<One,     1, OneHalf>>::Scale;
+		assert(S3::value<float>() == 10);
 
-		using S4 = Mesi::_internal::ScalingSimplify<std::ratio<1,1>, 1, std::ratio<1,2>, std::ratio<1,1>, 1, std::ratio<0, 1>>;
-		assert(S4::value<float> == std::pow(10.f, 0.5f));
+		using S4 = ScaleMultiply<Scale<One,     1, OneHalf >, Scale<One,     1, Zero   >>::Scale;
+		assert(S4::value<float>() == std::pow(10.f, 0.5f));
 
-		using S5 = Mesi::_internal::ScalingSimplify<std::ratio<2,1>, 2, std::ratio<0,1>, std::ratio<1,1>, 1, std::ratio<0, 1>>;
-		assert(S5::value<float> == std::pow(2.f, 0.5f));
+		using S5 = ScaleMultiply<Scale<Two,     2, Zero    >, Scale<One,     1, Zero   >>::Scale;
+		assert(S5::value<float>() == std::pow(2.f, 0.5f));
 
-		using S6 = Mesi::_internal::ScalingSimplify<std::ratio<2,1>, 2, std::ratio<1,2>, std::ratio<1,1>, 1, std::ratio<0, 1>>;
-		assert(S6::value<float> == std::pow(20.f, 0.5f));
+		using S6 = ScaleMultiply<Scale<Two,     2, OneHalf >, Scale<One,     1, Zero   >>::Scale;
+		assert(S6::value<float>() == std::pow(20.f, 0.5f));
 	}
 	Tee_SubTest(test_unit_scaling_maths) {
 		assert((std::is_same<Scalar::Multiply<2>::Multiply<3>, Scalar::Multiply<6>>::value));
@@ -394,7 +400,7 @@ Tee_Test(test_unit_exponentiation) {
 	using Minutes = Mesi::Minutes;
 
 	Tee_SubTest(test_helper) {
-		using RootScale = Mesi::_internal::ScalingPower<std::ratio<6,1>, 1, std::ratio<1,1>, std::ratio<1,2>>;
+		using RootScale = Mesi::_internal::ScalingPower<Mesi::_internal::Scale<std::ratio<6,1>, 1, std::ratio<1,1>>, std::ratio<1,2>>::Scale;
 		assert(RootScale::ratio::num == 6);
 		assert(RootScale::ratio::den == 1);
 		assert(RootScale::exponent_denominator == 2);

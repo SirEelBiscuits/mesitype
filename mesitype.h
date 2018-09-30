@@ -6,8 +6,84 @@
 
 namespace Mesi {
 	namespace _internal {
-		template<typename t_rat_1, intmax_t t_exp_den_1, typename t_po10_1, typename t_rat_2, intmax_t t_exp_den_2, typename t_po10_2>
-		struct ScalingSimplify
+		template<typename t_ratio, intmax_t t_exponent_denominator, typename t_power_of_ten>
+		struct Scale
+		{
+		private:
+			template<typename T, typename p>
+			struct PowerOfTenValue
+			{
+				static T value()
+				{
+					static T v = pow(T(10), T(p::num)/T(p::den));
+					return v;
+				}
+			};
+
+			template<typename T, intmax_t num>
+			struct PowerOfTenValue<T, std::ratio<num,1>>
+			{
+			private:
+				static constexpr T calculate_value() {
+					T ret = 1;
+					for(intmax_t i = 0; i < num; i++)
+					{
+						ret *= T(10);
+					}
+					for(intmax_t i = 0; i > num; i--)
+					{
+						ret /= T(10);
+					}
+					return ret;
+				}
+			public:
+				static T value()
+				{
+					static T v = calculate_value();
+					return v;
+				}
+			};
+			template<typename T, typename r, intmax_t e>
+			struct RatioValue
+			{
+				static T value()
+				{
+					static T v = pow(T(r::num)/T(r::den), T(1)/T(e));
+					return v;
+				}
+			};
+			template<typename T, typename r>
+			struct RatioValue<T, r, 1>
+			{
+				static T value()
+				{
+					static T v = T(r::num)/T(r::den);
+					return v;
+				}
+			};
+			template<typename T, typename ratio, intmax_t exponent_denominator, typename power_of_ten>
+			static T calculate_value()
+			{
+				return RatioValue<T, ratio, exponent_denominator>::value() * PowerOfTenValue<T, power_of_ten>::value();
+			}
+		public:
+			using ratio = t_ratio;
+			using power_of_ten = t_power_of_ten;
+			static constexpr intmax_t exponent_denominator = t_exponent_denominator;
+			
+			template<typename T>
+			static T value()
+			{
+				static T v = calculate_value<T, ratio, exponent_denominator, power_of_ten>();
+				return v;
+			}
+
+			using Inverse = Scale<std::ratio<ratio::den, ratio::num>, exponent_denominator, std::ratio<-power_of_ten::num, power_of_ten::den>>;
+			
+		};
+		using ScaleOne = Scale<std::ratio<1,1>, 1, std::ratio<0,1>>;
+		template<typename t_s1, typename t_s2>
+		struct ScaleMultiply
 		{
 		private:
 			struct Helper
@@ -33,11 +109,11 @@ namespace Mesi {
 				};
 
 				using p_ratio = std::ratio<
-					Mul<Exp<t_rat_1::num, t_exp_den_2>::value, Exp<t_rat_2::num, t_exp_den_1>::value>::value,
-					Mul<Exp<t_rat_1::den, t_exp_den_2>::value, Exp<t_rat_2::den, t_exp_den_1>::value>::value>;
+					Mul<Exp<t_s1::ratio::num, t_s2::exponent_denominator>::value, Exp<t_s2::ratio::num, t_s1::exponent_denominator>::value>::value,
+					Mul<Exp<t_s1::ratio::den, t_s2::exponent_denominator>::value, Exp<t_s2::ratio::den, t_s1::exponent_denominator>::value>::value>;
 
 				constexpr Helper()
-				: p_num(p_ratio::num), p_den(p_ratio::den), p_power_of_ten(0), p_exp_den(t_exp_den_1 * t_exp_den_2)
+				: p_num(p_ratio::num), p_den(p_ratio::den), p_power_of_ten(0), p_exp_den(t_s1::exponent_denominator * t_s2::exponent_denominator)
 				{
 					for(intmax_t d = 2; d < p_exp_den; d++)
 					{
@@ -107,58 +183,14 @@ namespace Mesi {
 				}
 			};
 
-			template<typename T, typename p>
-			struct PowerOfTenValue
-			{
-				static constexpr T value = pow(T(10), T(p::num)/T(p::den));
-			};
-			template<typename T, intmax_t num>
-			struct PowerOfTenValue<T, std::ratio<num,1>>
-			{
-			private:
-				static constexpr T calculate_value() {
-					T ret = 1;
-					for(intmax_t i = 0; i < num; i++)
-					{
-						ret *= T(10);
-					}
-					for(intmax_t i = 0; i > num; i--)
-					{
-						ret /= T(10);
-					}
-					return ret;
-				}
-			public:
-				static constexpr T value = calculate_value();
-			};
-			template<typename T, typename r, intmax_t e>
-			struct RatioValue
-			{
-				static constexpr T value = pow(T(r::num)/T(r::den), T(1)/T(e));
-			};
-			template<typename T, typename r>
-			struct RatioValue<T, r, 1>
-			{
-				static constexpr T value = T(r::num)/T(r::den);
-			};
-			template<typename T, typename ratio, intmax_t exponent_denominator, typename power_of_ten>
-			static constexpr T calculate_value()
-			{
-				return RatioValue<T, ratio, exponent_denominator>::value * PowerOfTenValue<T, power_of_ten>::value;
-			}
 		public:
-			using ratio = std::ratio<Helper().p_num, Helper().p_den>;
-			static constexpr intmax_t exponent_denominator = Helper().p_exp_den;
-			using power_of_ten = std::ratio_add<std::ratio_add<t_po10_1, t_po10_2>, std::ratio<Helper().p_power_of_ten, Helper().p_exp_den>>;
-
-			template<typename T>
-			static constexpr T value = calculate_value<T, ratio, exponent_denominator, power_of_ten>();
-			static constexpr float vr = RatioValue<float, ratio, exponent_denominator>::value;
-			static constexpr float pr = PowerOfTenValue<float, power_of_ten>::value;
+			using Scale = _internal::Scale<std::ratio<Helper().p_num, Helper().p_den>, Helper().p_exp_den, std::ratio_add<std::ratio_add<typename t_s1::power_of_ten, typename t_s2::power_of_ten>, std::ratio<Helper().p_power_of_ten, Helper().p_exp_den>>>;
 		};
 
-		template<typename t_ratio, intmax_t t_exp_den, typename t_power_of_ten, typename t_power>
-		using ScalingPower = ScalingSimplify<t_ratio, t_exp_den * t_power::den, std::ratio_multiply<t_power_of_ten, t_power>, std::ratio<1,1>, t_power::num, std::ratio<0,1>>;
+		template<typename t_scale, typename t_power>
+		using ScalingPower = ScaleMultiply<
+			Scale<typename t_scale::ratio, t_scale::exponent_denominator * t_power::den, std::ratio_multiply<typename t_scale::power_of_ten, t_power>>,
+			Scale<std::ratio<1,1>, t_power::num, std::ratio<0,1>>>;
 	}
 /* Utility macro for applying another macro to all known units, for internal use only */
 #define ALL_UNITS(op) op(m) op(s) op(kg) op(A) op(K) op(mol) op(cd)
@@ -192,7 +224,7 @@ namespace Mesi {
 	 */
 	template<typename T,
 		typename t_m, typename t_s, typename t_kg, typename t_A, typename t_K, typename t_mol, typename t_cd,
-		typename t_ratio, intmax_t t_exponent_denominator, typename t_power_of_ten>
+		typename t_scale>
 	struct RationalTypeReduced
 	{
 		using BaseType = T;
@@ -200,22 +232,19 @@ namespace Mesi {
 		using Zero = std::ratio<0,1>;
 		using One = std::ratio<1,1>;
 	public:
-		using ScalarType = RationalTypeReduced<T, Zero, Zero, Zero, Zero, Zero, Zero, Zero, One, 1, std::ratio<0,1>>;
+		using ScalarType = RationalTypeReduced<T, Zero, Zero, Zero, Zero, Zero, Zero, Zero, _internal::ScaleOne>;
 
-		template<typename t_scale_ratio, intmax_t t_scale_10_to_the = 0>
-		using Scale = RationalTypeReduced<T, t_m, t_s, t_kg, t_A, t_K, t_mol, t_cd,
-			  typename _internal::ScalingSimplify<t_ratio, t_exponent_denominator, t_power_of_ten, t_scale_ratio, 1, std::ratio<t_scale_10_to_the,1>>::ratio,
-			  _internal::ScalingSimplify<t_ratio, t_exponent_denominator, t_power_of_ten, t_scale_ratio, 1, std::ratio<t_scale_10_to_the,1>>::exponent_denominator,
-			  typename _internal::ScalingSimplify<t_ratio, t_exponent_denominator, t_power_of_ten, t_scale_ratio, 1, std::ratio<t_scale_10_to_the,1>>::power_of_ten>;
+		template<typename t_scale_ratio, intmax_t t_scale_exponent_denominator, typename t_scale_10_to_the>
+		using Scale = RationalTypeReduced<T, t_m, t_s, t_kg, t_A, t_K, t_mol, t_cd, typename _internal::ScaleMultiply<t_scale, _internal::Scale<t_scale_ratio, t_scale_exponent_denominator, t_scale_10_to_the>>::Scale>;
 
-		template<intmax_t t_scale>
-		using Multiply = Scale<std::ratio<t_scale, 1>>;
+		template<intmax_t t_scale_by>
+		using Multiply = Scale<std::ratio<t_scale_by, 1>, 1, std::ratio<0,1>>;
 
-		template<intmax_t t_scale>
-		using Divide = Scale<std::ratio<1, t_scale>>;
+		template<intmax_t t_scale_by>
+		using Divide = Scale<std::ratio<1, t_scale_by>, 1, std::ratio<0,1>>;
 
 		template<intmax_t t_pow>
-		using ScaleByTenToThe = Scale<std::ratio<1,1>, t_pow>;
+		using ScaleByTenToThe = Scale<std::ratio<1,1>, 1, std::ratio<t_pow,1>>;
 
 		template<typename t_pow>
 		using Pow = RationalTypeReduced<T,
@@ -226,9 +255,7 @@ namespace Mesi {
 			  std::ratio_multiply<t_K, t_pow>,
 			  std::ratio_multiply<t_mol, t_pow>,
 			  std::ratio_multiply<t_cd, t_pow>,
-			  typename _internal::ScalingPower<t_ratio, t_exponent_denominator, t_power_of_ten, t_pow>::ratio,
-			  _internal::ScalingPower<t_ratio, t_exponent_denominator, t_power_of_ten, t_pow>::exponent_denominator,
-			  typename _internal::ScalingPower<t_ratio, t_exponent_denominator, t_power_of_ten, t_pow>::power_of_ten>;
+			  typename _internal::ScalingPower<t_scale, t_pow>::Scale>;
 
 		T val;
 
@@ -247,12 +274,12 @@ namespace Mesi {
 			return val;
 		}
 
-		template<typename t_ratio2, intmax_t t_exponent_denominator2, typename t_power_of_ten2>
-		explicit constexpr operator RationalTypeReduced<T, t_m, t_s, t_kg, t_A, t_K, t_mol, t_cd, t_ratio2, t_exponent_denominator2, t_power_of_ten2>() const {
-			using Scale = _internal::ScalingSimplify<t_ratio, t_exponent_denominator, t_power_of_ten, std::ratio<t_ratio2::den, t_ratio2::num>, t_exponent_denominator2, std::ratio<-t_power_of_ten2::num, t_power_of_ten2::den>>;
-			T nv = val * Scale::template value<T>;
+		template<typename t_scale2>
+		explicit constexpr operator RationalTypeReduced<T, t_m, t_s, t_kg, t_A, t_K, t_mol, t_cd, t_scale2>() const {
+			using Scale = typename _internal::ScaleMultiply<t_scale, typename t_scale2::Inverse>::Scale;
+			T nv = val * Scale::template value<T>();
 
-			return RationalTypeReduced<T, t_m, t_s, t_kg, t_A, t_K, t_mol, t_cd, t_ratio2, t_exponent_denominator2, t_power_of_ten2>(nv);
+			return RationalTypeReduced<T, t_m, t_s, t_kg, t_A, t_K, t_mol, t_cd, t_scale2>(nv);
 		}
 
 		/**
@@ -263,42 +290,42 @@ namespace Mesi {
 			if( s_unitString.size() > 0 )
 				return s_unitString;
 
-			if( t_ratio::num != 1 )
+			if( t_scale::ratio::num != 1 )
 			{
 				s_unitString += " * ";
-				if( t_exponent_denominator != 1 && t_ratio::den != 1 )
+				if( t_scale::exponent_denominator != 1 && t_scale::ratio::den != 1 )
 				{
 					s_unitString += "(";
 				}
-				s_unitString += std::to_string(t_ratio::num);
-				if( t_ratio::den != 1 )
+				s_unitString += std::to_string(t_scale::ratio::num);
+				if( t_scale::ratio::den != 1 )
 				{
-					s_unitString += "/" + std::to_string(t_ratio::den);
+					s_unitString += "/" + std::to_string(t_scale::ratio::den);
 				}
-				if( t_exponent_denominator != 1 )
+				if( t_scale::exponent_denominator != 1 )
 				{
-					if( t_ratio::den != 1 )
+					if( t_scale::ratio::den != 1 )
 					{
 						s_unitString += ")";
 					}
 					s_unitString += "^(1/";
-					s_unitString += std::to_string(t_exponent_denominator);
+					s_unitString += std::to_string(t_scale::exponent_denominator);
 					s_unitString += ")";
 				}
 				s_unitString += " ";
 			}
 
-			if( t_power_of_ten::num != 0 )
+			if( t_scale::power_of_ten::num != 0 )
 			{
 				s_unitString += "* 10^";
-				if(t_power_of_ten::den != 1)
+				if(t_scale::power_of_ten::den != 1)
 				{
 					s_unitString += "(";
 				}
-				s_unitString += std::to_string(static_cast<long long>(t_power_of_ten::num));
-				if(t_power_of_ten::den != 1)
+				s_unitString += std::to_string(t_scale::power_of_ten::num);
+				if(t_scale::power_of_ten::den != 1)
 				{
-					s_unitString += "/" + std::to_string(static_cast<long long>(t_power_of_ten::den)) + ")";
+					s_unitString += "/" + std::to_string(t_scale::power_of_ten::den) + ")";
 				}
 				s_unitString += " ";
 			}
@@ -341,15 +368,12 @@ namespace Mesi {
 	};
 
 	template<typename T, typename t_m, typename t_s, typename t_kg, typename t_A, typename t_K, typename t_mol, typename t_cd, typename t_ratio, intmax_t t_exponent_denominator, typename t_power_of_ten>
-	using RationalType = RationalTypeReduced<T, t_m, t_s, t_kg, t_A, t_K, t_mol, t_cd,
-		typename _internal::ScalingSimplify<t_ratio, t_exponent_denominator, t_power_of_ten, std::ratio<1,1>, 1, std::ratio<0,1>>::ratio,
-		_internal::ScalingSimplify<t_ratio, t_exponent_denominator, t_power_of_ten, std::ratio<1,1>, 1, std::ratio<0,1>>::exponent_denominator,
-		typename _internal::ScalingSimplify<t_ratio, t_exponent_denominator, t_power_of_ten, std::ratio<1,1>, 1, std::ratio<0,1>>::power_of_ten>;
+	using RationalType = RationalTypeReduced<T, t_m, t_s, t_kg, t_A, t_K, t_mol, t_cd, typename _internal::Scale<t_ratio, t_exponent_denominator, t_power_of_ten>>;
 
-#define TYPE_A_FULL_PARAMS typename t_m, typename t_s, typename t_kg, typename t_A, typename t_K, typename t_mol, typename t_cd, typename t_ratio, intmax_t t_ratio_exponent_denominator, typename t_power_of_ten
-#define TYPE_A_PARAMS t_m, t_s, t_kg, t_A, t_K, t_mol, t_cd, t_ratio, t_ratio_exponent_denominator, t_power_of_ten
-#define TYPE_B_FULL_PARAMS typename t_m2, typename t_s2, typename t_kg2, typename t_A2, typename t_K2, typename t_mol2, typename t_cd2, typename t_ratio2, intmax_t t_ratio_exponent_denominator2, typename t_power_of_ten2
-#define TYPE_B_PARAMS t_m2, t_s2, t_kg2, t_A2, t_K2, t_mol2, t_cd2, t_ratio2, t_ratio_exponent_denominator2, t_power_of_ten2
+#define TYPE_A_FULL_PARAMS typename t_m, typename t_s, typename t_kg, typename t_A, typename t_K, typename t_mol, typename t_cd, typename t_scale
+#define TYPE_A_PARAMS t_m, t_s, t_kg, t_A, t_K, t_mol, t_cd, t_scale
+#define TYPE_B_FULL_PARAMS typename t_m2, typename t_s2, typename t_kg2, typename t_A2, typename t_K2, typename t_mol2, typename t_cd2, typename t_scale2
+#define TYPE_B_PARAMS t_m2, t_s2, t_kg2, t_A2, t_K2, t_mol2, t_cd2, t_scale2
 	/*
 	 * Arithmatic operators for combining SI values.
 	 */
@@ -374,11 +398,11 @@ namespace Mesi {
 		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
 		RationalTypeReduced<T, TYPE_B_PARAMS> const& right
 	) {
-		using Scale = _internal::ScalingSimplify<t_ratio, t_ratio_exponent_denominator, t_power_of_ten, t_ratio2, t_ratio_exponent_denominator2, t_power_of_ten2>;
+		using Scale = typename _internal::ScaleMultiply<t_scale, t_scale2>::Scale;
 #define ADD_FRAC(TP) using TP = std::ratio_add<t_##TP, t_##TP##2>;
 		ALL_UNITS(ADD_FRAC)
 #undef ADD_FRAC
-		return RationalType<T, m, s, kg, A, K, mol, cd, typename Scale::ratio, Scale::exponent_denominator, typename Scale::power_of_ten>(left.val * right.val);
+		return RationalTypeReduced<T, m, s, kg, A, K, mol, cd, Scale>(left.val * right.val);
 	}
 
 	template<typename T, TYPE_A_FULL_PARAMS, TYPE_B_FULL_PARAMS>
@@ -386,11 +410,11 @@ namespace Mesi {
 		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
 		RationalTypeReduced<T, TYPE_B_PARAMS> const& right
 	) {
-		using Scale = _internal::ScalingSimplify<t_ratio, t_ratio_exponent_denominator, t_power_of_ten, std::ratio<t_ratio2::den, t_ratio2::num>, t_ratio_exponent_denominator2, std::ratio<-t_power_of_ten2::num, t_power_of_ten2::den>>;
+		using Scale = typename _internal::ScaleMultiply<t_scale, typename t_scale2::Inverse>::Scale;
 #define SUB_FRAC(TP) using TP = std::ratio_subtract<t_##TP, t_##TP##2>;
 		ALL_UNITS(SUB_FRAC)
 #undef SUB_FRAC
-		return RationalType<T, m, s, kg, A, K, mol, cd, typename Scale::ratio, Scale::exponent_denominator, typename Scale::power_of_ten>(left.val / right.val);
+		return RationalTypeReduced<T, m, s, kg, A, K, mol, cd, Scale>(left.val / right.val);
 	}
 
 	/*
