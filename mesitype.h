@@ -368,7 +368,7 @@ namespace Mesi {
 	};
 
 	template<typename T, typename t_m, typename t_s, typename t_kg, typename t_A, typename t_K, typename t_mol, typename t_cd, typename t_ratio, intmax_t t_exponent_denominator, typename t_power_of_ten>
-	using RationalType = RationalTypeReduced<T, t_m, t_s, t_kg, t_A, t_K, t_mol, t_cd, typename _internal::Scale<t_ratio, t_exponent_denominator, t_power_of_ten>>;
+	using RationalType = RationalTypeReduced<T, t_m, t_s, t_kg, t_A, t_K, t_mol, t_cd, typename _internal::ScaleMultiply<typename _internal::Scale<t_ratio, t_exponent_denominator, t_power_of_ten>, _internal::ScaleOne>::Scale>;
 
 #define TYPE_A_FULL_PARAMS typename t_m, typename t_s, typename t_kg, typename t_A, typename t_K, typename t_mol, typename t_cd, typename t_scale
 #define TYPE_A_PARAMS t_m, t_s, t_kg, t_A, t_K, t_mol, t_cd, t_scale
