@@ -37,7 +37,7 @@ namespace Mesi {
 					return ret;
 				}
 			public:
-				static T value()
+				static constexpr T value()
 				{
 					constexpr T v = calculate_value();
 					return v;
@@ -55,7 +55,7 @@ namespace Mesi {
 			template<typename T, typename r>
 			struct RatioValue<T, r, 1>
 			{
-				static T value()
+				static constexpr T value()
 				{
 					constexpr T v = T(r::num)/T(r::den);
 					return v;
