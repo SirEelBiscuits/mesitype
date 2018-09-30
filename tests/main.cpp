@@ -406,6 +406,13 @@ Tee_Test(test_unit_exponentiation) {
 		assert(RootScale::exponent_denominator == 2);
 		assert(RootScale::power_of_ten::num == 1);
 		assert(RootScale::power_of_ten::den == 2);
+		
+		using ScalarScale = Mesi::_internal::ScalingPower<RootScale, std::ratio<2,1>>::Scale;
+		assert(ScalarScale::ratio::num == 1);
+		assert(ScalarScale::ratio::den == 1);
+		assert(ScalarScale::exponent_denominator == 1);
+		assert(ScalarScale::power_of_ten::num == 0);
+		assert(ScalarScale::power_of_ten::den == 1);
 	}
 
 	Tee_SubTest(test_sqrt) {
