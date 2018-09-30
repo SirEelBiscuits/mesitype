@@ -1,11 +1,12 @@
-#include "../mesitype.h"
-#include "tee/tee.hpp"
-
+#include <cmath>
 #include <vector>
 #include <string>
 #include <tuple>
 #include <iostream>
 #include <regex>
+
+#include "../mesitype.h"
+#include "tee/tee.hpp"
 
 using namespace std;
 
@@ -358,6 +359,25 @@ Tee_Test(test_prefixes) {
 
 Tee_Test(test_unit_scaling) {
 	using Scalar = Mesi::Scalar;
+	Tee_SubTest(test_scaling_helpers) {
+		using S1 = Mesi::_internal::ScalingSimplify<std::ratio<1,2>, 1, std::ratio<0,1>, std::ratio<2,1>, 1, std::ratio<0, 1>>;
+		assert(S1::value<float> == 1);
+		
+		using S2 = Mesi::_internal::ScalingSimplify<std::ratio<1,2>, 2, std::ratio<0,1>, std::ratio<1,2>, 2, std::ratio<0, 1>>;
+		assert(S2::value<float> == 0.5);
+		
+		using S3 = Mesi::_internal::ScalingSimplify<std::ratio<1,1>, 1, std::ratio<1,2>, std::ratio<1,1>, 1, std::ratio<1, 2>>;
+		assert(S3::value<float> == 10);
+		
+		using S4 = Mesi::_internal::ScalingSimplify<std::ratio<1,1>, 1, std::ratio<1,2>, std::ratio<1,1>, 1, std::ratio<0, 1>>;
+		assert(S4::value<float> == std::pow(10.f, 0.5f));
+		
+		using S5 = Mesi::_internal::ScalingSimplify<std::ratio<2,1>, 2, std::ratio<0,1>, std::ratio<1,1>, 1, std::ratio<0, 1>>;
+		assert(S5::value<float> == std::pow(2.f, 0.5f));
+
+		using S6 = Mesi::_internal::ScalingSimplify<std::ratio<2,1>, 2, std::ratio<1,2>, std::ratio<1,1>, 1, std::ratio<0, 1>>;
+		assert(S6::value<float> == std::pow(20.f, 0.5f));
+	}
 	Tee_SubTest(test_unit_scaling_maths) {
 		assert((std::is_same<Scalar::Multiply<2>::Multiply<3>, Scalar::Multiply<6>>::value));
 		assert((std::is_same<Scalar::Multiply<2>::Divide<2>, Scalar>::value));

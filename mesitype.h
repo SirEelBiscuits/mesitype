@@ -107,10 +107,54 @@ namespace Mesi {
 				}
 			};
 
+			template<typename T, typename p>
+			struct PowerOfTenValue
+			{
+				static constexpr T value = pow(T(10), T(p::num)/T(p::den));
+			};
+			template<typename T, intmax_t num>
+			struct PowerOfTenValue<T, std::ratio<num,1>>
+			{
+			private:
+				static constexpr T calculate_value() {
+					T ret = 1;
+					for(intmax_t i = 0; i < num; i++)
+					{
+						ret *= T(10);
+					}
+					for(intmax_t i = 0; i > num; i--)
+					{
+						ret /= T(10);
+					}
+					return ret;
+				}
+			public:
+				static constexpr T value = calculate_value();
+			};
+			template<typename T, typename r, intmax_t e>
+			struct RatioValue
+			{
+				static constexpr T value = pow(T(r::num)/T(r::den), T(1)/T(e));
+			};
+			template<typename T, typename r>
+			struct RatioValue<T, r, 1>
+			{
+				static constexpr T value = T(r::num)/T(r::den);
+			};
+			template<typename T, typename ratio, intmax_t exponent_denominator, typename power_of_ten>
+			static constexpr T calculate_value()
+			{
+				return RatioValue<T, ratio, exponent_denominator>::value * PowerOfTenValue<T, power_of_ten>::value;
+			}
 		public:
 			using ratio = std::ratio<Helper().p_num, Helper().p_den>;
 			static constexpr intmax_t exponent_denominator = Helper().p_exp_den;
 			using power_of_ten = std::ratio_add<std::ratio_add<t_po10_1, t_po10_2>, std::ratio<Helper().p_power_of_ten, Helper().p_exp_den>>;
+			
+			template<typename T>
+			static constexpr T value = calculate_value<T, ratio, exponent_denominator, power_of_ten>();
+			static constexpr float vr = RatioValue<float, ratio, exponent_denominator>::value;
+			static constexpr float pr = PowerOfTenValue<float, power_of_ten>::value;
 		};
 	}
 /* Utility macro for applying another macro to all known units, for internal use only */
@@ -190,18 +234,7 @@ namespace Mesi {
 		template<typename t_ratio2, intmax_t t_exponent_denominator2, typename t_power_of_ten2>
 		explicit constexpr operator RationalTypeReduced<T, t_m, t_s, t_kg, t_A, t_K, t_mol, t_cd, t_ratio2, t_exponent_denominator2, t_power_of_ten2>() const {
 			using Scale = _internal::ScalingSimplify<t_ratio, t_exponent_denominator, t_power_of_ten, std::ratio<t_ratio2::den, t_ratio2::num>, t_exponent_denominator2, std::ratio<-t_power_of_ten2::num, t_power_of_ten2::den>>;
-			T nv = val;
-
-			// TODO: Scale properly. Will need pow<T> for this if the exponent denominators require it...
-			static_assert(Scale::power_of_ten::den == 1, "Conversions only work if the powers of ten difference between scaling ratios is integral at the moment");
-			static_assert(Scale::exponent_denominator == 1, "Conversions only work for rational scaling at the moment");
-
-			nv *= Scale::ratio::num;
-			nv /= Scale::ratio::den;
-			for(intmax_t i = 0; i < Scale::power_of_ten::num; i++)
-				nv *= 10;
-			for(intmax_t i = 0; i > Scale::power_of_ten::num; i--)
-				nv /= 10;
+			T nv = val * Scale::template value<T>;
 
 			return RationalTypeReduced<T, t_m, t_s, t_kg, t_A, t_K, t_mol, t_cd, t_ratio2, t_exponent_denominator2, t_power_of_ten2>(nv);
 		}
