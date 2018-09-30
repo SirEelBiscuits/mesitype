@@ -414,9 +414,18 @@ Tee_Test(test_unit_exponentiation) {
 		assert(ScalarScale::power_of_ten::den == 1);
 	}
 
-	Tee_SubTest(test_sqrt) {
+	Tee_SubTest(test_type_pow) {
 		using SqMin = Minutes::Pow<std::ratio<1,2>>;
 		assert((std::is_same<decltype(SqMin{}*SqMin{}), Minutes>::value));
+	}
+
+	Tee_SubTest(test_var_pow) {
+		Mesi::Minutes a = Mesi::Minutes(5);
+		auto b = Mesi::pow<std::ratio<2,1>>(a);
+		auto c = Mesi::pow<std::ratio<1,2>>(b);
+
+		assert(b == Mesi::Minutes(1)*Mesi::Minutes(1)*25);
+		assert(c == a);
 	}
 }
 

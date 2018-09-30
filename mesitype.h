@@ -557,6 +557,12 @@ namespace Mesi {
 		return left > right || left == right;
 	}
 
+	template<typename t_pow_ratio, typename T, TYPE_A_FULL_PARAMS>
+	auto pow(RationalTypeReduced<T, TYPE_A_PARAMS> v)
+	{
+		return typename RationalTypeReduced<T, TYPE_A_PARAMS>::template Pow<t_pow_ratio>(std::pow(T(v.val), T(t_pow_ratio::num)/T(t_pow_ratio::den)));
+	}
+
 #undef TYPE_A_FULL_PARAMS
 #undef TYPE_A_PARAMS
 #undef TYPE_B_FULL_PARAMS
