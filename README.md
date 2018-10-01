@@ -142,11 +142,16 @@ the source code.
 Advanced Usage
 --------------
 
-It is sometimes convenient to have non-integral exponents of units. This is
-available too, via `Mesi::RationalType`.
+It is sometimes convenient to define non-integral exponents of units directly.
+This is available too, via `Mesi::RationalType`.
 `RationalType` takes `std::ratio` arguments for its powers rather than integers.
 `RationalType` has all the features of the integral version (the integral
 version is in fact a simplified interface to the rational version).
+
+You can also use `Type::Pow` to raise a type to any rational power. This
+template expects a `std::ratio` type. `Mesi::Meters::Pow<std::ratio<2,1>>` are
+square meters, and `Mesi::Seconds::Pow<std::ratio<-1,2>>` are `s^(-1/2) =
+sqrt(Hz)`.
 
 `Type` and `RationalType` have three extra template arguments, `t_ratio`,
 `t_exponent_denominator`, and `t_power_of_ten`.
