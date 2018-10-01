@@ -622,7 +622,7 @@ namespace Mesi {
 	 */
 
 	template<typename T, intmax_t t_m, intmax_t t_s, intmax_t t_kg, intmax_t t_A=0, intmax_t t_K=0, intmax_t t_mol=0, intmax_t t_cd=0, typename t_ratio = std::ratio<1,1>, intmax_t t_exponent_denominator=1, typename t_power_of_ten = std::ratio<0,1>>
-	using Type = RationalType<T, std::ratio<t_m, 1>, std::ratio<t_s, 1>, std::ratio<t_kg, 1>, std::ratio<t_A, 1>, std::ratio<t_K, 1>, std::ratio<t_mol, 1>, std::ratio<t_cd, 1>, t_ratio, t_exponent_denominator, t_pref>;
+	using Type = RationalType<T, std::ratio<t_m, 1>, std::ratio<t_s, 1>, std::ratio<t_kg, 1>, std::ratio<t_A, 1>, std::ratio<t_K, 1>, std::ratio<t_mol, 1>, std::ratio<t_cd, 1>, t_ratio, t_exponent_denominator, t_power_of_ten>;
 
 #ifndef MESI_LITERAL_TYPE
 #	define MESI_LITERAL_TYPE float
