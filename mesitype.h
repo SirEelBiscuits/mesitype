@@ -6,6 +6,9 @@
 
 namespace Mesi {
 	namespace _internal {
+		/**
+		 * Multiply two values, raising a compile-time error on overflow
+		 */
 		template<intmax_t a, intmax_t b>
 		struct Mul
 		{
@@ -13,15 +16,28 @@ namespace Mesi {
 			static constexpr intmax_t value = a*b;
 		};
 
+		/**
+		 * Raises base to the pow-th power using recursion, raising a
+		 * compile-time error on overflow
+		 */
 		template<intmax_t base, intmax_t pow>
 		struct Exp : public Mul<base, Exp<base, pow-1>::value> {};
 
+		/**
+		 * End of the recursion
+		 */
 		template<intmax_t base>
 		struct Exp<base, 0>
 		{
 			static constexpr intmax_t value = 1;
 		};
 
+		/**
+		 * Type to hold scaling information for Mesi types.
+		 *
+		 * The full scaling factor is t_ratio^(1/t_exponent_denominator) * 10^t_power_of_ten,
+		 * with t_ratio and t_power_of_ten being std::ratio<>s
+		 */
 		template<typename t_ratio, intmax_t t_exponent_denominator, typename t_power_of_ten>
 		struct Scale
 		{
@@ -78,7 +94,7 @@ namespace Mesi {
 				}
 			};
 			template<typename T, typename ratio, intmax_t exponent_denominator, typename power_of_ten>
-			static T calculate_value()
+			static constexpr T calculate_value()
 			{
 				return RatioValue<T, ratio, exponent_denominator>::value() * PowerOfTenValue<T, power_of_ten>::value();
 			}
@@ -87,38 +103,62 @@ namespace Mesi {
 			using power_of_ten = t_power_of_ten;
 			static constexpr intmax_t exponent_denominator = t_exponent_denominator;
 			
+			/**
+			 * Calculates the full scaling factor as type T, possibly as a
+			 * constexpr.  This can only be constexpr if exponent_denominator
+			 * is 1 and power_of_ten an integer, because otherwise the
+			 * non-constexpr pow() has to be used.
+			 */
 			template<typename T>
-			static T value()
+			static constexpr T value()
 			{
-				static T v = calculate_value<T, ratio, exponent_denominator, power_of_ten>();
-				return v;
+				return calculate_value<T, ratio, exponent_denominator, power_of_ten>();
 			}
 
+			/**
+			 * The inverse of the type, i.e. 1/Scale
+			 */
 			using Inverse = Scale<std::ratio<ratio::den, ratio::num>, exponent_denominator, std::ratio<-power_of_ten::num, power_of_ten::den>>;
 			
 		};
+
+		/**
+		 * Convenience definition for a scaling factor of 1
+		 */
 		using ScaleOne = Scale<std::ratio<1,1>, 1, std::ratio<0,1>>;
 		
+		/**
+		 * std::ratio<2,2> is not the same as std::ratio<1,1>. We can use this
+		 * template to reduce the ratio before using it as a template argument.
+		 */
 		template<typename t>
 		struct RatioSimplify
 		{
 			using ratio = std::ratio<t::num,t::den>;
 		};
 
+		/**
+		 * Simplifies a scale by reducing any roots where possible, e.g.
+		 * (9/4)^(1/2) -> (3/2)
+		 */
 		template<typename t_s>
 		struct ScaleSimplify
 		{
 		private:
+			/**
+			 * Helper struct to do the actual calculations in its constructor
+			 */
 			struct Helper
 			{
 				constexpr Helper()
 				: p_num(t_s::ratio::num), p_den(t_s::ratio::den), p_power_of_ten(0), p_exp_den(t_s::exponent_denominator)
 				{
+					// Find all factors of the exponent denominator
 					for(intmax_t d = 2; d <= p_exp_den; d++)
 					{
 						while(p_exp_den % d == 0)
 						{
-							// This is a factor of the exponent's denominator, try to take the d-th root of numerator and denominator
+							// This is a factor, try to take the d-th root of numerator and denominator
 							intmax_t rn = root(p_num, d);
 							intmax_t rd = root(p_den, d);
 							if(rn && rd)
@@ -136,6 +176,7 @@ namespace Mesi {
 						}
 					}
 
+					// Factor out any remaining powers of ten
 					while((p_num % 10) == 0)
 					{
 						p_num /= 10;
@@ -189,6 +230,9 @@ namespace Mesi {
 				>;
 		};
 		
+		/**
+		 * Multiplies two scaling factors and simplifies the result
+		 */
 		template<typename t_s1, typename t_s2>
 		struct ScaleMultiply
 		{
@@ -200,6 +244,9 @@ namespace Mesi {
 				std::ratio_add<typename t_s1::power_of_ten, typename t_s2::power_of_ten>>>::Scale;
 		};
 
+		/**
+		 * Raises a scaling factor to a rational power
+		 */
 		template<typename t_scale, typename t_power>
 		struct ScalePower
 		{
@@ -230,9 +277,8 @@ namespace Mesi {
 	 * @param t_K similar to t_m, but Kelvin
 	 * @param t_mol similar to t_m, but moles
 	 * @param t_cd similar to t_m, but candela
-	 * @param t_ratio defines a scaling factor, i.e. 1,1000 for 1/1000 == milli-
-	 * @param t_power_of_10 does the same as t_ratio, but as a power of 10.
-	 *        Using 3 here would be the same as a kilo- prefix.
+	 * @param t_scale defines a scaling factor, e.g. Scale<std::ratio<6,1>, 1,
+	 *        std::ratio<1,1>> for a scaling factor of 60.
 	 *
 	 * This class is to enforce compile-time checking, and where possible,
 	 * compile-time calculation of SI values using constexpr.
@@ -240,8 +286,10 @@ namespace Mesi {
 	 * Note: MESI_LITERAL_TYPE may be defined to set the storage type
 	 * used by the operator literal overloads
 	 *
-	 * Note: t_ratio should have any powers of 10 factored out into
-	 * t_power_of_10. To do this automatically, use RationalType<>
+	 * Note: t_scale should be reduced to its simplest form, with the exponent
+	 * denominator as low as possible and no powers of ten remaining in the
+	 * ratio. To achieve this, please consider using RationalType instead of
+	 * handling RationalTypeReduced directly.
 	 *
 	 * @author Jameson Thatcher (a.k.a. SirEel)
 	 *
@@ -573,7 +621,7 @@ namespace Mesi {
 	 * Readable names for common types
 	 */
 
-	template<typename T, intmax_t t_m, intmax_t t_s, intmax_t t_kg, intmax_t t_A=0, intmax_t t_K=0, intmax_t t_mol=0, intmax_t t_cd=0, typename t_ratio = std::ratio<1,1>, typename t_pref = std::ratio<0,1>, intmax_t t_exponent_denominator=1>
+	template<typename T, intmax_t t_m, intmax_t t_s, intmax_t t_kg, intmax_t t_A=0, intmax_t t_K=0, intmax_t t_mol=0, intmax_t t_cd=0, typename t_ratio = std::ratio<1,1>, intmax_t t_exponent_denominator=1, typename t_power_of_ten = std::ratio<0,1>>
 	using Type = RationalType<T, std::ratio<t_m, 1>, std::ratio<t_s, 1>, std::ratio<t_kg, 1>, std::ratio<t_A, 1>, std::ratio<t_K, 1>, std::ratio<t_mol, 1>, std::ratio<t_cd, 1>, t_ratio, t_exponent_denominator, t_pref>;
 
 #ifndef MESI_LITERAL_TYPE

@@ -3,7 +3,7 @@
 TARGET=mesitype
 #CXX=g++
 
-C_FLAGS+= -std=c++14 --pedantic -w
+C_FLAGS+= -std=c++14 --pedantic -w -g
 
 SRC_FILES = $(shell find . -name '*.cpp' | grep -v tee)
 

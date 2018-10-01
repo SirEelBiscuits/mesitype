@@ -148,16 +148,23 @@ available too, via `Mesi::RationalType`.
 `RationalType` has all the features of the integral version (the integral
 version is in fact a simplified interface to the rational version).
 
-`Type` and `RationalType` have two extra template arguments, `t_ratio` and
-`t_power_of_ten`.
-`t_power_of_ten` is used to create SI prefixes, but takes any integral value
+`Type` and `RationalType` have three extra template arguments, `t_ratio`,
+`t_exponent_denominator`, and `t_power_of_ten`.
+`t_ratio` and is used to create SI prefixes, but takes any  value
 happily.
 `t_ratio` expects a `std::ratio` type, and is also just a multiplier to the
 value. It can be used to make non-decimal scaled units, like minutes
-(`std::ratio<60,1>`) or fortnights, or imperial units.
+(`std::ratio<60,1>`) or fortnights, or imperial units.  `t_power_of_ten` also
+expects a `std::ratio` and is used to create SI prefixes, but will also take
+any other rational value.  `t_exponent_denominator` accepts any strictly
+positive integer value and can in special cases be used to create roots of
+scaling factors. Combining `t_ratio=std::ratio<2,1>`,
+`t_power_of_ten=std::ratio<3,1>`, `t_exponent_denominator=4` will result in an
+overall scaling factor of `2^(1/4) * 10^3`.
 You do not need to worry about simplifying the multiplier between `t_ratio` and
-`t_power_of_10`, as this is done for you, so long as you don't use
-`RationalTypeReduced` directly (which there is good no reason to do).
+`t_power_of_10` or calculating roots of `t_ratio`, as this is done for you, so
+long as you don't use `RationalTypeReduced` directly (which there is good no
+reason to do).
 
 Limitations
 -----------
