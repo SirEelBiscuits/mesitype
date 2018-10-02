@@ -155,9 +155,7 @@ sqrt(Hz)`.
 
 `Type` and `RationalType` have three extra template arguments, `t_ratio`,
 `t_exponent_denominator`, and `t_power_of_ten`.
-`t_ratio` and is used to create SI prefixes, but takes any  value
-happily.
-`t_ratio` expects a `std::ratio` type, and is also just a multiplier to the
+`t_ratio` expects a `std::ratio` type, and is a multiplier to the
 value. It can be used to make non-decimal scaled units, like minutes
 (`std::ratio<60,1>`) or fortnights, or imperial units.  `t_power_of_ten` also
 expects a `std::ratio` and is used to create SI prefixes, but will also take
