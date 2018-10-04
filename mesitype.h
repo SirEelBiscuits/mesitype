@@ -41,7 +41,7 @@ namespace Mesi {
 		template<typename t_ratio, intmax_t t_exponent_denominator, typename t_power_of_ten>
 		struct Scale
 		{
-			static_assert(t_exponent_denominator > 0);
+			static_assert(t_exponent_denominator > 0, "The exponent denominator must be positive");
 		private:
 			template<typename T, typename p>
 			struct PowerOfTenValue
