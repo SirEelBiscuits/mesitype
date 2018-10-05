@@ -142,22 +142,32 @@ the source code.
 Advanced Usage
 --------------
 
-It is sometimes convenient to have non-integral exponents of units. This is
-available too, via `Mesi::RationalType`.
+It is sometimes convenient to define non-integral exponents of units directly.
+This is available too, via `Mesi::RationalType`.
 `RationalType` takes `std::ratio` arguments for its powers rather than integers.
 `RationalType` has all the features of the integral version (the integral
 version is in fact a simplified interface to the rational version).
 
-`Type` and `RationalType` have two extra template arguments, `t_ratio` and
-`t_power_of_ten`.
-`t_power_of_ten` is used to create SI prefixes, but takes any integral value
-happily.
-`t_ratio` expects a `std::ratio` type, and is also just a multiplier to the
+You can also use `Type::Pow` to raise a type to any rational power. This
+template expects a `std::ratio` type. `Mesi::Meters::Pow<std::ratio<2,1>>` are
+square meters, and `Mesi::Seconds::Pow<std::ratio<-1,2>>` are `s^(-1/2) =
+sqrt(Hz)`.
+
+`Type` and `RationalType` have three extra template arguments, `t_ratio`,
+`t_exponent_denominator`, and `t_power_of_ten`.
+`t_ratio` expects a `std::ratio` type, and is a multiplier to the
 value. It can be used to make non-decimal scaled units, like minutes
-(`std::ratio<60,1>`) or fortnights, or imperial units.
+(`std::ratio<60,1>`) or fortnights, or imperial units.  `t_power_of_ten` also
+expects a `std::ratio` and is used to create SI prefixes, but will also take
+any other rational value.  `t_exponent_denominator` accepts any strictly
+positive integer value and can in special cases be used to create roots of
+scaling factors. Combining `t_ratio=std::ratio<2,1>`,
+`t_power_of_ten=std::ratio<3,1>`, `t_exponent_denominator=4` will result in an
+overall scaling factor of `2^(1/4) * 10^3`.
 You do not need to worry about simplifying the multiplier between `t_ratio` and
-`t_power_of_10`, as this is done for you, so long as you don't use
-`RationalTypeReduced` directly (which there is good no reason to do).
+`t_power_of_10` or calculating roots of `t_ratio`, as this is done for you, so
+long as you don't use `RationalTypeReduced` directly (which there is good no
+reason to do).
 
 Limitations
 -----------
