@@ -267,6 +267,21 @@ namespace Mesi {
 /* Utility macro for applying another macro to all known units, for internal use only */
 #define ALL_UNITS(op) op(m) op(s) op(kg) op(A) op(K) op(mol) op(cd)
 
+	template<typename T>
+	struct TypeOperationsDefaults
+	{
+		using MultiplyResult = decltype(T{}*T{});
+		using DivideResult = decltype(T{}/T{});
+		using AddResult = decltype(T{}+T{});
+		using SubtractResult = decltype(T{}-T{});
+		using PowerResult = decltype(std::pow(T{},T{}));
+	};
+
+	template<typename T>
+	struct TypeOperations : public TypeOperationsDefaults<T>
+	{
+	};
+
 	/**
 	 * @brief Main class to store SI types
 	 *
@@ -349,6 +364,11 @@ namespace Mesi {
 		{}
 
 		constexpr RationalTypeReduced(RationalTypeReduced const& in)
+			:val(in.val)
+		{}
+
+		template<typename U>
+		constexpr RationalTypeReduced(RationalTypeReduced<U, t_m, t_s, t_kg, t_A, t_K, t_mol, t_cd, t_scale> const& in)
 			:val(in.val)
 		{}
 
@@ -464,7 +484,7 @@ namespace Mesi {
 		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
 		RationalTypeReduced<T, TYPE_A_PARAMS> const& right
 	) {
-		return RationalTypeReduced<T, TYPE_A_PARAMS>(left.val + right.val);
+		return RationalTypeReduced<typename TypeOperations<T>::AddResult, TYPE_A_PARAMS>(left.val + right.val);
 	}
 
 	template<typename T, TYPE_A_FULL_PARAMS>
@@ -472,7 +492,7 @@ namespace Mesi {
 		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
 		RationalTypeReduced<T, TYPE_A_PARAMS> const& right
 	) {
-		return RationalTypeReduced<T, TYPE_A_PARAMS>(left.val - right.val);
+		return RationalTypeReduced<typename TypeOperations<T>::SubtractResult, TYPE_A_PARAMS>(left.val - right.val);
 	}
 
 	template<typename T, TYPE_A_FULL_PARAMS, TYPE_B_FULL_PARAMS>
@@ -484,7 +504,7 @@ namespace Mesi {
 #define ADD_FRAC(TP) using TP = std::ratio_add<t_##TP, t_##TP##2>;
 		ALL_UNITS(ADD_FRAC)
 #undef ADD_FRAC
-		return RationalTypeReduced<T, m, s, kg, A, K, mol, cd, Scale>(left.val * right.val);
+		return RationalTypeReduced<typename TypeOperations<T>::MultiplyResult, m, s, kg, A, K, mol, cd, Scale>(left.val * right.val);
 	}
 
 	template<typename T, TYPE_A_FULL_PARAMS, TYPE_B_FULL_PARAMS>
@@ -496,7 +516,7 @@ namespace Mesi {
 #define SUB_FRAC(TP) using TP = std::ratio_subtract<t_##TP, t_##TP##2>;
 		ALL_UNITS(SUB_FRAC)
 #undef SUB_FRAC
-		return RationalTypeReduced<T, m, s, kg, A, K, mol, cd, Scale>(left.val / right.val);
+		return RationalTypeReduced<typename TypeOperations<T>::DivideResult, m, s, kg, A, K, mol, cd, Scale>(left.val / right.val);
 	}
 
 	/*
@@ -526,7 +546,7 @@ namespace Mesi {
 		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
 		S const& right
 	) {
-		return RationalTypeReduced<T, TYPE_A_PARAMS>(left.val * right);
+		return RationalTypeReduced<typename TypeOperations<T>::MultiplyResult, TYPE_A_PARAMS>(left.val * right);
 	}
 
 	template<typename T, TYPE_A_FULL_PARAMS, typename S>
@@ -542,7 +562,7 @@ namespace Mesi {
 		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
 		S const& right
 	) {
-		using Scalar = typename RationalTypeReduced<T, TYPE_A_PARAMS>::ScalarType;
+		using Scalar = typename RationalTypeReduced<typename TypeOperations<T>::DivideResult, TYPE_A_PARAMS>::ScalarType;
 		return left / Scalar(T(right));
 	}
 
