@@ -546,7 +546,7 @@ namespace Mesi {
 		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
 		S const& right
 	) {
-		return RationalTypeReduced<typename TypeOperations<T,S>::MultiplyResult, TYPE_A_PARAMS>(left.val * right);
+		return RationalTypeReduced<T, TYPE_A_PARAMS>(left.val * right);
 	}
 
 	template<typename T, TYPE_A_FULL_PARAMS, typename S>
@@ -562,7 +562,7 @@ namespace Mesi {
 		RationalTypeReduced<T, TYPE_A_PARAMS> const& left,
 		S const& right
 	) {
-		using Scalar = typename RationalTypeReduced<typename TypeOperations<T,S>::DivideResult, TYPE_A_PARAMS>::ScalarType;
+		using Scalar = typename RationalTypeReduced<T, TYPE_A_PARAMS>::ScalarType;
 		return left / Scalar(T(right));
 	}
 
