@@ -6,6 +6,7 @@
 #include <regex>
 
 #include "../mesitype.h"
+#include "../mesimath.h"
 #include "tee/tee.hpp"
 
 using namespace std;
@@ -418,6 +419,49 @@ Tee_Test(test_unit_exponentiation) {
 		using SqMin = Minutes::Pow<std::ratio<1,2>>;
 		assert((std::is_same<decltype(SqMin{}*SqMin{}), Minutes>::value));
 	}
+
+	Tee_SubTest(test_var_pow) {
+		Mesi::Minutes a = Mesi::Minutes(5);
+		auto b = Mesi::pow<std::ratio<2,1>>(a);
+		auto c = Mesi::pow<std::ratio<1,2>>(b);
+
+		assert(b == Mesi::Minutes(1)*Mesi::Minutes(1)*25);
+		assert(c == a);
+	}
+}
+
+Tee_Test(test_std_math) {
+	using Scalar = Mesi::Scalar;
+	using Volts = Mesi::Volts;
+
+	Tee_SubTest(test_scalar_math) {
+		#define TEST_SCALAR_FUN(f, value) assert(Scalar(f(value)) == f(Scalar(value)))
+		TEST_SCALAR_FUN(exp, 1);
+		TEST_SCALAR_FUN(exp, 2);
+		TEST_SCALAR_FUN(exp2, 1);
+		TEST_SCALAR_FUN(exp2, 2);
+		#undef TEST_SCALAR_FUN
+	}
+	Tee_SubTest(test_unary) {
+		#define TEST_UNARY_FUN(f, x) assert(Volts(f(x)) == f(Volts(x)))
+		TEST_UNARY_FUN(abs, 1);
+		TEST_UNARY_FUN(abs, -1);
+		#undef TEST_UNARY_FUN
+	}
+	Tee_SubTest(test_binary) {
+		#define TEST_BINARY_FUN(f, ux, x, uy, y, ur) assert(ur(f(x, y)) == f(ux(x), uy(y)))
+		TEST_BINARY_FUN(fmin, Volts, 1, Volts, 5, Volts);
+		#undef TEST_BINARY_FUN
+	}
+	Tee_SubTest(test_custom) {
+		using namespace Mesi::Literals;
+		
+		assert(5_v == std::fma(2_a, 2_ohm, 1_v));
+		assert(5_v == std::sqrt(5_v * 5_v));
+		assert(2_v == std::cbrt(2_v * 2_v * 2_v));
+		assert(5_v == std::hypot(4_v, 3_v));
+	}
+
 
 	Tee_SubTest(test_var_pow) {
 		Mesi::Minutes a = Mesi::Minutes(5);
