@@ -12,7 +12,7 @@ Authors
 -------
 
 - Jameson Thatcher
-- Valentin Ochs
+- Lynn Ochs
 
 Features
 --------
